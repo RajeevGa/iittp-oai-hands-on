@@ -26,15 +26,15 @@ day2: $(DAY2_HTML)
 
 $(AFTERNOON_HTML): $(AFTERNOON_SRC) $(CSS_FILE) $(HEADER_FILE)
 	$(PANDOC) $(SLIDY_OPTS) \
-		--css=../$(CSS_FILE) \
-		-H ../$(HEADER_FILE) \
+		--css=$(CSS_FILE) \
+		-H $(HEADER_FILE) \
 		-o $@ $<
 	@echo "Built: $@"
 
 $(DAY2_HTML): $(DAY2_SRC) $(CSS_FILE) $(HEADER_FILE)
 	$(PANDOC) $(SLIDY_OPTS) \
-		--css=../$(CSS_FILE) \
-		-H ../$(HEADER_FILE) \
+		--css=$(CSS_FILE) \
+		-H $(HEADER_FILE) \
 		-o $@ $<
 	@echo "Built: $@"
 
