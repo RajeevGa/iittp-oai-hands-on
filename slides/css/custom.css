@@ -1,0 +1,157 @@
+/* ==========================================================
+   OAI 5G NR Workshop — IIT Tirupati
+   Custom Slidy Stylesheet
+   ========================================================== */
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #333;
+}
+
+h1 {
+  color: #8B0000;
+  border-bottom: 2px solid #8B0000;
+  padding-bottom: 8px;
+}
+
+a { color: #2980b9; }
+
+/* ---- Code blocks: simple, like ANTS 2024 ---- */
+code {
+  white-space: pre-wrap;
+  background: #E4E5E7;
+}
+
+pre {
+  background: #E4E5E7;
+  padding: 10px 14px;
+  overflow-x: auto;
+  border: none;
+  border-radius: 0;
+}
+
+/* Override pandoc syntax highlighting — make it all plain */
+pre.sourceCode { background: #E4E5E7; }
+code.sourceCode { background: #E4E5E7; white-space: pre; }
+code.sourceCode span { color: inherit !important; font-weight: normal !important; font-style: normal !important; }
+div.sourceCode { margin: 0.8em 0; }
+
+/* ---- Section Divider ---- */
+.slide.section-divider {
+  background: #2c3e50;
+  color: white;
+  text-align: center;
+  padding-top: 150px;
+}
+
+.section-divider h1 {
+  color: white;
+  border: none;
+}
+
+/* ---- ACTION slides ---- */
+.slide.action {
+  border-left: 6px solid #e67e22;
+}
+
+.slide.action h1 {
+  color: #e67e22;
+  border-bottom-color: #e67e22;
+}
+
+.slide.action h1::before {
+  content: "🔧 ";
+}
+
+/* ---- OBSERVE slides ---- */
+.slide.observe {
+  border-left: 6px solid #27ae60;
+}
+
+.slide.observe h1 {
+  color: #27ae60;
+  border-bottom-color: #27ae60;
+}
+
+.slide.observe h1::before {
+  content: "🔍 ";
+}
+
+/* ---- DISCUSS slides ---- */
+.slide.discuss {
+  border-left: 6px solid #8e44ad;
+}
+
+.slide.discuss h1 {
+  color: #8e44ad;
+  border-bottom-color: #8e44ad;
+}
+
+.slide.discuss h1::before {
+  content: "💬 ";
+}
+
+/* ---- Key Concept Box ---- */
+.key-concept {
+  background: #eaf2f8;
+  border-left: 4px solid #2980b9;
+  padding: 10px 16px;
+  margin: 12px 0;
+}
+
+/* ---- Diagrams ---- */
+.diagram { text-align: center; margin: 16px 0; }
+.diagram img { max-width: 85%; max-height: 450px; }
+.diagram .caption { font-size: 0.85em; color: #666; font-style: italic; }
+
+.diagram-placeholder {
+  border: 2px dashed #bbb;
+  background: #f9f9f9;
+  padding: 30px;
+  text-align: center;
+  color: #888;
+  margin: 16px 0;
+}
+
+/* ---- NF Labels ---- */
+.nf-label {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  font-size: 0.85em;
+  color: white;
+}
+
+.nf-amf  { background: #e67e22; }
+.nf-smf  { background: #2980b9; }
+.nf-upf  { background: #27ae60; }
+.nf-ausf { background: #8e44ad; }
+.nf-udm  { background: #c0392b; }
+.nf-nrf  { background: #2c3e50; }
+.nf-nssf { background: #16a085; }
+.nf-pcf  { background: #d35400; }
+
+/* ---- Mermaid diagrams ---- */
+.mermaid {
+  text-align: center;
+  margin: 16px 0;
+  background: none !important;
+}
+
+/* ---- Progress bar ---- */
+.progress-bar {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0 16px 0;
+}
+
+.progress-bar .step {
+  flex: 1;
+  height: 5px;
+  background: #ddd;
+  border-radius: 3px;
+}
+
+.progress-bar .step.done    { background: #27ae60; }
+.progress-bar .step.current { background: #e67e22; }

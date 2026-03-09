@@ -1,0 +1,33 @@
+<!-- Mermaid JS for rendering sequence diagrams -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  // Initialize mermaid after page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      sequence: {
+        diagramMarginX: 20,
+        diagramMarginY: 10,
+        actorMargin: 60,
+        width: 150,
+        height: 40,
+        messageMargin: 30,
+        mirrorActors: false,
+        useMaxWidth: true
+      }
+    });
+
+    // Pandoc wraps mermaid in: <pre class="mermaid"><code>...</code></pre>
+    // Mermaid expects: <pre class="mermaid">...</pre> (no <code> wrapper)
+    document.querySelectorAll('pre.mermaid').forEach(function(pre) {
+      var code = pre.querySelector('code');
+      if (code) {
+        pre.textContent = code.textContent;
+        pre.classList.add('mermaid');
+      }
+    });
+
+    mermaid.run();
+  });
+</script>
