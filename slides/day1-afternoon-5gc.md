@@ -71,6 +71,14 @@ sudo usermod -a -G docker $(whoami)
 ```
 ❗ Now, close the terminal tab and re-open it.
 
+-  If you dont have a docker account, create a docker account in [docker signup](https://www.docker.com/)
+-  Login to docker
+
+     ```bash
+        docker login -u <username>
+     ```
+- Enter your password
+
 
 <!-- ============================================================ -->
 <!-- ACTION: Clone repositories                                    -->
@@ -206,20 +214,21 @@ The 5G system has three main parts:
   - *oai-cn5g-amf* is meant for AMF NF
   - All OAI 5G CN NFs are dockerized
 
-* Go the core network folder in the directory that you have cloned
+## Clone the OAI RAN repository {.action}
+
+Open a new terminal and clone the ran repository (tag: 2026.w10)
+
+  ```bash
+      git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
+      cd ~/openairinterface5g
+      git checkout 2026.w10
+  ```
+
+* The docker compose file and configuration files for `OAI 5G Core` is present in the following directory
 
      ```bash
-         cd ~/iittp-oai-hands-on/cn
+         cd ~/openairinterface5g/doc/tutorial_resources/oai-cn5g
      ```
-
--  If you dont have a docker account, create a docker account in [docker signup](https://www.docker.com/)
--  Login to docker
-
-     ```bash
-        docker login -u <username>
-     ```
-- Enter your password
-
 ---
 
 ## Deploying OAI 5G core {.action}
@@ -276,15 +285,10 @@ All the docker containers should be `healthy`
 
 ## Installing OAI gNB & UE
 
-Open a new terminal and clone the ran repository
-```bash
-git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
-```
-compile the gNB and nrUE
+compile the gNB and nrUE (tag: 2026.w10)
 
 ```bash
-cd openairinterface5g/
-git checkout 2026.w10
+cd ~/openairinterface5g/
 source oaienv
 cd cmake_targets/
 ./build_oai -I # Only for first time build 
