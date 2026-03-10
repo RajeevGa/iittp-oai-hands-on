@@ -1,6 +1,6 @@
 % 5G Core Network & OAI Hands-on
 % OAI 5G NR Workshop — IIT Tirupati
-% March 13, 2026 | Afternoon Session
+% March 14, 2026 | Afternoon Session
 
 <!-- ============================================================ -->
 <!-- SECTION 0: WELCOME & GETTING STARTED                         -->
@@ -151,11 +151,7 @@ The 5G system has three main parts:
 
 <div style="flex: 1;">
   <img src="images/5g-core-arch.png"
-       style="max-width: 80%; height: auto;">
-
-  <img src="images/5gc-sba.png"
-       alt="End-to-end 5G architecture: UE — RAN — Core — Internet"
-       style="max-width: 80%; height: auto;">
+       style="max-width: 100%; height: auto;">
 </div>
 
 </div>
@@ -185,19 +181,17 @@ The 5G system has three main parts:
 </div>
 
 <div style="flex: 1;">
-  <img src="images/proto-nas.jpeg"
-       style="max-width: 80%; height: auto;">
+<div style="display: flex; flex-direction: column; align-items: center;">
+  <img src="images/proto-nas.jpeg" style="max-width: 80%; height: auto;">
+  <p class="caption"><small>Control Plane</small></p>
+<img src="images/proto-as.jpeg" style="max-width: 85%; height: auto;">
+  <p class="caption"><small>User Plane</small></p>
+</div>
 
-  <img src="images/proto-as.jpeg"
-       alt="End-to-end 5G architecture: UE — RAN — Core — Internet"
-       style="max-width: 80%; height: auto;">
-  <p class="caption"></small> End-to-end 5G system — UE connects through RAN to Core Network and onward to the Internet </small></p>
-
-</small>
-- **NR-Uu:** Radio interface (UE ↔ gNB) — RRC carries NAS messages
-- **N2:** gNB ↔ AMF — NGAP over SCTP
-- **N11:** AMF ↔ SMF — HTTP/2 (Service-Based Interface)
-
+<small>
+  **NR-Uu:** Radio interface (UE ↔ gNB)
+  **N2:** gNB ↔ AMF — NGAP over SCTP
+  **N11:** AMF ↔ SMF — HTTP/2 (Service-Based Interface)
 </small>
 </div>
 
@@ -207,94 +201,78 @@ The 5G system has three main parts:
 
 ## Installing OAI 5G Core {.action}
 
-- **Main repository**  <https://gitlab.eurecom.fr/oai/cn5g>
-- **Each NF has its own repository**. Example: <https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf>
+- Main repository  <https://gitlab.eurecom.fr/oai/cn5g>
+- Each NF has its own repository. Example: <https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf>
   - *oai-cn5g-amf* is meant for AMF NF
   - All OAI 5G CN NFs are dockerized
 
-* Go the core network folder in the workshop directory that you have cloned
+* Go the core network folder in the directory that you have cloned
 
-```bash
-cd ~/iittp-oai-hands-on/cn
-```
+     ```bash
+         cd ~/iittp-oai-hands-on/cn
+     ```
 
- If you dont have a docker account, create a docker account in [docker signup](https://www.docker.com/)
+-  If you dont have a docker account, create a docker account in [docker signup](https://www.docker.com/)
+-  Login to docker
 
- Login to docker
-
-```bash
-docker login -u <username>
-```
-
- Enter your password
+     ```bash
+        docker login -u <username>
+     ```
+- Enter your password
 
 ---
 
 ## Deploying OAI 5G core {.action}
 
-* Now, pull the 5G core docker images
-```bash
-docker compose pull
-```
-
+- Now, pull the 5G core docker images
+   
+    ```bash
+     docker compose pull
+    ```
 * start core network
-```bash
-docker compose -f docker-compose.yaml up -d
-```
+   
+    ```bash
+     docker compose -f docker-compose.yaml up -d
+    ```
+* watch status of the core network
 
-watch status of the core network
-```bash
-watch docker compose -f docker-compose.yaml ps -a
-```
+    ```bash
+     watch docker compose -f docker-compose.yaml ps -a
+    ```
 All the docker containers should be `healthy`
 
 - Important files: MySQL database stores the subscriber data,  yaml file is contains details of all NFs
 - Some useful commands
   - docker ps -a
-  - docker logs oai-amf -f
-  - docker logs oai-smf -f
+  - docker logs <container name> -f
 
-## OAI Deployment Modes
+## OpenAirInterface Operating Modes
 
-<p align="center">
-<img style="display: block; margin: auto;" src="images/oai-mode-ota-cots.jpg" alt="Over-the-Air with COTS UE" width="250" style="display:inline-block; margin:10px;"/>
-<img style="display: block; margin: auto;" src="images/oai-mode-ota-oaiue.jpg" alt="Over-the-Air with OAI nrUE" width="250" style="display:inline-block; margin:10px;"/>
-<img style="display: block; margin: auto;" src="images/oai-mode-rfsim.jpg" alt="RFsimulator" width="250" style="display:inline-block; margin:10px;"/>
-</p>
-
-| | OTA + COTS UE | OTA + OAI nrUE | RFsimulator |
-|---|---|---|---|
-| **RF Hardware** | SDR / Radio Unit | SDR on both sides | None |
-| **UE** | Commercial phone | OAI software UE | OAI software UE |
-| **Radio Channel** | Real | Real | Simulated (TCP) |
-| **Protocols** | Real | Real | Real |
-| **Use case** | Field trials, demos | Research, testing | Learning, development |
-
----
-
-## Why RFsimulator?
-
-<p align="center">
-<img style="display: block; margin: auto;" src="../images/oai-deployment-modes.jpg" alt="OAI Deployment Modes" width="800"/>
-</p>
-
-<!-- If image not ready, uncomment this:
-<p align="center"><em>[Image: Three modes — OTA+COTS UE, OTA+OAI UE, RFsim]</em></p>
--->
-
-RFsim is perfect for learning and protocol development because:
-
-- **No hardware needed** — runs on any laptop
-- **Reproducible** — no RF interference or hardware quirks
-- **All signaling is real** — NAS, NGAP, PFCP, GTP-U messages are identical to a live network
-- **Wireshark works** — you can capture and analyze every protocol message
-- **Fast iteration** — change config, restart, test in seconds
+<div style="display: flex; align-items: start; gap: 1em; margin-top: 0;">
+<div style="flex: 1; margin: 0; padding: 0;">
+- RFsimulator mode
+  - No hardware and non real time
+  - No over the air transmissions
+  - Complete protocol stack except the RF part
+  - Can induce channel models between gNB and nrUE
+  - Learning, development and testing protocols
+- RFsim is perfect for learning and protocol development because:
+    - No hardware needed — runs on any laptop
+    - Reproducible — no RF interference or hardware quirks
+    - Fast iteration — change config, restart, test in seconds
 
 **For this workshop:** We use rfsim so everyone can participate with just a laptop.
 
 **In the lab:** We will also show a live over-the-air demo with real SDR hardware!
 
---- 
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center;">
+  <img src="images/oai-modes.png" style="max-width: 95%; height: auto;">
+</div>
+
+</div>
+
 
 ## Installing OAI gNB & UE
 
@@ -309,7 +287,7 @@ cd openairinterface5g/
 git checkout 2026.w10
 source oaienv
 cd cmake_targets/
-./build_oai -I  
+./build_oai -I # Only for first time build 
 ./build_oai -w SIMU --gNB --nrUE --ninja
 ```
 
@@ -393,6 +371,8 @@ You should see an IP address like `10.0.0.x`
 
 ## Ping Test {.action}
 
+In another terminal:
+
 ```bash
 # From UE to the external data network container
 ping -I oaitun_ue1 192.168.70.135
@@ -426,7 +406,8 @@ iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 20M
 
 🎉 **Congratulations — you have a working end-to-end 5G network!**
 
-Now let's understand what just happened under the hood...
+- Lets close UE and gNB applications (type ctrl+c in the terminals)
+- Now let's understand what just happened under the hood...
 
 <!-- ============================================================ -->
 <!-- SECTION 3: UNDERSTANDING WHAT HAPPENED                       -->
@@ -439,16 +420,16 @@ Now let's understand what just happened under the hood...
 ## The 5G Standalone Call Flow
 
 <p align="center">
-<img style="display: block; margin: auto;" src="images/callflow.png" alt="5G SA Call Flow" width="800"/>
+<img style="display: block; margin: auto;" src="images/5gcall-flow.png" alt="5G SA Call Flow" width="950"/>
 </p>
-
-When you launched the nrUE, all of this happened automatically. Let's break it down.
+<br>
+When you launched the nrUE, all these messages are exchanged, let's break it down!
 
 ---
 
 ## Key Configuration Files {.action}
 
-Before we look at the signaling, let's understand what parameters you configured:
+Before we look at the signaling, let's understand some parameters you configured:
 
 **5G Core:** `~/iittp-oai-hands-on/cn/conf/config.yaml`
 
@@ -456,36 +437,85 @@ Before we look at the signaling, let's understand what parameters you configured
 
 **nrUE:** `~/iittp-oai-hands-on/ran/conf/nrue.conf`
 
-<p align="center">
-<img style="display: block; margin: auto;" src="images/imsi.png" alt="IMSI/SUPI configuration" width="800"/>
-</p>
+## Connecting gNB and Core Network
 
-These parameters must **match** between UE, gNB, and Core: **MCC, MNC, SST, SD, SUPI, Key, OPc, DNN**
+- Before any UE can register, the gNB itself must first connect to the 5G Core.
+- Happens through the **NGAP** (Next Generation Application Protocol) over the **N2 interface**.
+- gNB establishes an SCTP transport connection to the AMF in the core network.
+- 🤝 **NG Setup Request / Response**
+     - The gNB sends an **NG Setup Request** 
+     - The AMF replies with an **NG Setup Response** 
+- ✅  Now the gNb is ready to serve UEs
+- Lets see the configuration files to see the parameters
+  - Core: `~/iittp-oai-hands-on/cn/conf/config.yaml`
+  - gNB: `~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf`
 
----
-## UE Identifiers — Who Are You?
+## Steps in Connecting a UE
+<div style="display: flex; align-items: start; gap: 1em; margin-top: 0;">
+<div style="flex: 1; margin: 0; padding: 0;">
+When you turn on your phone or enter a new coverage area, it needs to **register** with the network before it can make calls or use data. 
 
-The 5G system uses multiple identifiers for the UE:
+This happens in a few steps:
 
-| Identifier | What | When Used |
-|-----------|------|-----------|
-| **SUPI** | Subscription Permanent Identifier (like IMSI) | Stored in SIM & UDM. Never sent in clear. |
-| **SUCI** | Subscription Concealed Identifier | Encrypted SUPI — sent during first registration |
-| **5G-GUTI** | Globally Unique Temporary ID | Assigned by AMF after registration — used afterwards |
+- 🙋  Registration Request
+     - This is essentially the phone saying *"Hey, I'm here — let me in!"*
+     - It includes the UE's identity so the network knows who is trying to connect.
 
-<div class="key-concept">
-<strong>Privacy improvement over 4G:</strong> In 5G, the permanent identity (SUPI) is <em>never</em>
-sent over the air in plaintext. The UE encrypts it into a SUCI using the home network's public key.
+- 🔐 Authentication
+     - Verifying if its legitimate UE and network
+-  🛡️ Security Mode & Registration Accept
+    - Both sides trust each other
+    - The network activates **encryption and integrity protection** on all future messages
 </div>
 
-**SUPI format:** MCC (3 digits) + MNC (2–3 digits) + MSIN (up to 10 digits)
+<div style="display: flex; flex-direction: column; align-items: center;">
+  <img src="images/fake-gnb.png" style="max-width: 95%; height: auto;">
+</div>
 
-Example: `208950000000031` → MCC=208, MNC=95, MSIN=0000000031
-
-**Look at your ue.conf** — can you find the IMSI? That's the SUPI!
+</div>
 
 
-## Registration Flow — The Big Picture
+---
+
+## UE Identifiers
+
+Every phone has a few key identifiers — think of them as different types of ID cards:
+
+- 🛂 **IMSI** — *International Mobile Subscriber Identity*
+  - Tied to your **SIM card**. Uniquely identifies you as a subscriber.
+
+- 📟 **IMEI** — *International Mobile Equipment Identity*
+  - Tied to the **physical device**. Identifies the hardware, not the person.
+
+- 📞 **MSISDN** — *Your phone number*
+
+- 🏷️ **GUTI / 5G-GUTI** — *Temporary ID*
+  - Assigned by the network after registration. Used instead of your real identity for privacy (like a visitor badge)
+
+- An IMSI is a 15-digit number with three parts:
+
+```
+IMSI: 404 49 1234567890
+       │   │  │
+       │   │  └── MSIN: Mobile Subscriber Identification Number (9-10digits. your unique ID within the network)
+       │   └───── MNC:  Mobile Network Code (49 = Airtel), 2-3 digits.
+       └───────── MCC:  Mobile Country Code (404 = India) 
+```
+
+
+## 🔒 4G vs 5G: Privacy Improvement
+
+ - In **4G (LTE)**, the IMSI is sent **in plain text** over the air during the initial attach. 
+ - This is a known privacy risk — anyone with a radio receiver (like an IMSI catcher) can grab your identity.
+ - In 5G, iInstead of sending the raw IMSI, the UE **encrypts** it into a value called **SUCI** (Subscription Concealed Identifier) before transmitting.
+ - The network decrypts it on its side. 
+ - This means even if someone intercepts the message, they only see a scrambled value — not your real identity.
+ - Lets see the configuration files to see the parameters
+   - Core: `~/iittp-oai-hands-on/cn/conf/config.yaml`
+   - nrUE: `~/iittp-oai-hands-on/ran/conf/nrue.conf`
+
+
+## Registration Flow 
 
 ```{.mermaid}
 sequenceDiagram
@@ -521,8 +551,6 @@ sequenceDiagram
     AMF->>UE: Registration Accept (5G-GUTI)
     UE-->>AMF: Registration Complete
 ```
-
-This is what happened when you launched the nrUE. Let's break it down step by step.
 
 
 ## Step 1: Registration Request
@@ -563,13 +591,10 @@ sequenceDiagram
     AUSF-->>AMF: Success + Kseaf
 ```
 
-<div class="key-concept">
-<strong>Mutual authentication:</strong> The UE verifies the network (via AUTN) AND
-the network verifies the UE (via RES*). Neither side trusts the other blindly.
-</div>
-
-**Pre-shared secrets:** Both UE (SIM) and UDM know **K** (secret key) and **OP/OPc**.
-These are the `key` and `opc` fields in your `ue.conf` and the CN database!
+- <strong>Mutual authentication:</strong> The UE verifies the network (via AUTN) AND
+the network verifies the UE (via RES*)
+- **Pre-shared secrets:** Both UE (SIM) and UDM know **K** (secret key) and **OP/OPc**
+- These are the `key` and `opc` fields in your `ue.conf` and the CN database!
 
 ## Step 3: Security Mode & Registration Accept
 
@@ -623,9 +648,10 @@ ngap || nas-5gs || pfcp || gtp
 
 ## Find the Registration Messages {.observe}
 
-In Wireshark, you should see these messages. Find each one:
+In Wireshark, you should see these messages. 
+Find and analyze each one.
 
-| # | Direction | Message | What to Look For |
+|  |  | |  |
 |---|-----------|---------|-----------------|
 | 1 | gNB → AMF | **NGAP: InitialUEMessage** | Contains NAS Registration Request with SUCI |
 | 2 | AMF → gNB → UE | **NAS: Authentication Request** | Contains RAND and AUTN |
@@ -666,17 +692,16 @@ Let's see what happens when authentication fails:
 
 ## Most Common Errors
 
-| Error | Cause | Where to Check |
+| Error | Cause |  Check |
 |-------|-------|---------------|
 | NGAP Setup Failure | MCC/MNC mismatch between gNB and CN | gNB config vs CN config.yaml |
 | Unidentified/Illegal UE | SUPI not in CN database | CN database (oai_db.sql) |
 | Authentication Failure | Key or OPc mismatch | ue.conf vs CN database |
 | PDU Session Reject | DNN or SST mismatch | ue.conf vs CN config |
 
-**Debug tools:** 
-1. Wireshark traces
-2. `docker logs oai-amf -f`
-3. `docker logs oai-smf -f`
+- **Debug tools:** 
+  - Wireshark traces
+  -  `docker logs oai-amf -f`
 <!-- ============================================================ -->
 <!-- SECTION 5: WRAP-UP                                           -->
 <!-- ============================================================ -->
