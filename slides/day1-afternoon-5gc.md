@@ -306,7 +306,7 @@ compile the gNB and nrUE
 
 ```bash
 cd openairinterface5g/
-git checkout 2024.w46
+git checkout 2026.w10
 source oaienv
 cd cmake_targets/
 ./build_oai -I  
@@ -319,16 +319,25 @@ cd cmake_targets/
 
 ```bash
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E ./nr-softmodem --rfsim \
-  -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf
+sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server
 ```
 
 **Watch for in the logs:**
 
 ```
 [NGAP]   Send NGSetupRequest to AMF
+[NGAP]   3584 -> 0000e000
+[NGAP]   Served GUAMIs for AMF OAI-AMF (assoc_id=23):
+[NGAP]    GUAMI:
+[NGAP]      PLMN: MCC=001, MNC=01
+[NGAP]      AMF Region ID: 1
+[NGAP]      AMF Set ID: 1
+[NGAP]      AMF Pointer: 1
+[NGAP]   Supported PLMN 0: MCC=001 MNC=01
+[NGAP]   Supported slice (PLMN 0): SST=0x01 SD=000
 [NGAP]   Received NGSetupResponse from AMF
-[GNB_APP]   [gNB 0] Received NGAP_REGISTER_GNB_CNF: associated AMF 1
+[UTIL]   threadCreate() for TASK_GTPV1_U: creating thread with affinity ffffffff, priority 50
+[GNB_APP] [gNB 0] Received NGAP_REGISTER_GNB_CNF: associated AMF 1
 ```
 
 This means gNB has successfully connected to the 5G Core!
@@ -341,17 +350,20 @@ In another terminal:
 
 ```bash
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
-  -C 3619200000 --rfsim --ssb 516 \
-  -O ~/iittp-oai-hands-on/ran/conf/ue.conf
+sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue.conf
 ```
 
 **Watch the logs for these milestones:**
 
 ```
-[NR_RRC]   State = NR_RRC_CONNECTED
-[NAS]   [UE] Received REGISTRATION ACCEPT message
-[OIP]   Interface oaitun_ue1 successfully configured, IPv4 10.0.0.x
+[NR_RRC] State = NR_RRC_CONNECTED
+[NR_RRC] RRCReconfiguration includes Measurement Configuration
+[NR_RRC] Measurement gaps not yet supported!
+[NAS]    [UE 0] Received NAS_CONN_ESTABLI_CNF: errCode 1, length 98
+[NR_RRC] rrcReconfigurationComplete Encoded 10 bits (2 bytes)
+[NR_RRC]  Logical Channel UL-DCCH (SRB1), Generating RRCReconfigurationComplete (bytes 2)
+[NAS]    Received PDU Session Establishment Accept, UE IPv4: 10.0.0.2
+[OIP]    TUN Interface oaitun_ue1 successfully configured, IPv4 10.0.0.2, IPv6 (null)
 ```
 
 🎉 **Your UE is connected to the 5G network!**
@@ -363,10 +375,10 @@ sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
 **gNB logs — check for:**
 
 ```
-[NR_MAC]   UE RNTI b010: Received Ack of Msg4. CBRA procedure succeeded!
-[NR_RRC]   Received RRCSetupComplete (RRC_CONNECTED reached)
-[NR_RRC]   Received Security Mode Complete
-[NR_RRC]   NGAP_PDUSESSION_SETUP_RESP: sending the message
+[NR_RRC] [UL] (cellID bc614e, UE ID 1 RNTI 70af) Received RRCReconfigurationComplete
+[NR_RRC] PDU Session Setup: ID=10, outgoing TEID=0x16461cbc, Addr=192.168.70.129
+[NR_RRC] NGAP_PDUSESSION_SETUP_RESP: sending the message
+[NGAP]   Encoded PDU Session Transfer (10): TEID=0x16461cbc, Addr=192.168.70.129
 ```
 
 **nrUE — check interface is up:**
@@ -386,7 +398,7 @@ You should see an IP address like `10.0.0.x`
 ping -I oaitun_ue1 192.168.70.135
 
 # From the container to the UE (downlink)
-docker exec -it oai-ext-dn ping 
+docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
 The IP address `192.168.70.135` is the IP address of the `oai-ext-dn` container.
@@ -406,10 +418,10 @@ On the host in a new terminal, run iperf3 client bound to the UE IP:
 
 ```bash
 # Downlink test
-iperf3 -B  -c 192.168.70.135 -u -b 50M -R
+iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 50M -R
 
 # Uplink test
-iperf3 -B  -c 192.168.70.135 -u -b 20M
+iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 20M
 ```
 
 🎉 **Congratulations — you have a working end-to-end 5G network!**
@@ -442,7 +454,7 @@ Before we look at the signaling, let's understand what parameters you configured
 
 **gNB:** `~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf`
 
-**nrUE:** `~/iittp-oai-hands-on/ran/conf/ue.conf`
+**nrUE:** `~/iittp-oai-hands-on/ran/conf/nrue.conf`
 
 <p align="center">
 <img style="display: block; margin: auto;" src="images/imsi.png" alt="IMSI/SUPI configuration" width="800"/>
@@ -628,7 +640,7 @@ In Wireshark, you should see these messages. Find each one:
 
 Let's compare what Wireshark shows with the theory:
 
-1. **Find the SUCI** in the Registration Request — can you see the MCC/MNC? Is the MSIN in clear text or concealed? Compare with your `ue.conf`
+1. **Find the SUCI** in the Registration Request — can you see the MCC/MNC? Is the MSIN in clear text or concealed? Compare with your `nrue.conf`
 
 2. **Find RAND and AUTN** in the Authentication Request — these are the challenge from the network
 
@@ -661,7 +673,10 @@ Let's see what happens when authentication fails:
 | Authentication Failure | Key or OPc mismatch | ue.conf vs CN database |
 | PDU Session Reject | DNN or SST mismatch | ue.conf vs CN config |
 
-**Debug tools:** Wireshark traces + `docker logs oai-amf -f` + `docker logs oai-smf -f`
+**Debug tools:** 
+1. Wireshark traces
+2. `docker logs oai-amf -f`
+3. `docker logs oai-smf -f`
 <!-- ============================================================ -->
 <!-- SECTION 5: WRAP-UP                                           -->
 <!-- ============================================================ -->
@@ -712,7 +727,7 @@ For tomorrow, you'll need the same environment.
  2. Stop gNB: Ctrl+C in the gNB terminal
  3. Stop CN: 
      cd ~/iittp-oai-hands-on/cn
-     idocker compose down    # stop
+     docker compose down    # stop
 ```
 
 **Don't delete** the OAI build — we'll use the same binaries tomorrow!
