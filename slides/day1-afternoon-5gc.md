@@ -219,15 +219,16 @@ The 5G system has three main parts:
 Open a new terminal and clone the ran repository (tag: 2026.w10)
 
   ```bash
+      cd ~/iittp-oai-hands-on 
       git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
-      cd ~/openairinterface5g
+      cd openairinterface5g
       git checkout 2026.w10
   ```
 
 * The docker compose file and configuration files for `OAI 5G Core` is present in the following directory
 
      ```bash
-         cd ~/openairinterface5g/doc/tutorial_resources/oai-cn5g
+         cd ~/iittp-oai-hands-on/openairinterface5g/doc/tutorial_resources/oai-cn5g
      ```
 ---
 
@@ -288,7 +289,7 @@ All the docker containers should be `healthy`
 compile the gNB and nrUE (tag: 2026.w10)
 
 ```bash
-cd ~/openairinterface5g/
+cd ~/iittp-oai-hands-on/openairinterface5g
 source oaienv
 cd cmake_targets/
 ./build_oai -I # Only for first time build 
@@ -300,7 +301,7 @@ cd cmake_targets/
 ## Launch gNB {.action}
 
 ```bash
-cd ~/openairinterface5g/cmake_targets/ran_build/build
+cd ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build
 sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server
 ```
 
@@ -331,7 +332,7 @@ This means gNB has successfully connected to the 5G Core!
 In another terminal:
 
 ```bash
-cd ~/openairinterface5g/cmake_targets/ran_build/build
+cd ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build
 sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue.conf
 ```
 
@@ -755,7 +756,7 @@ For tomorrow, you'll need the same environment.
  1. Stop nrUE: Ctrl+C in the nrUE terminal
  2. Stop gNB: Ctrl+C in the gNB terminal
  3. Stop CN: 
-     cd ~/iittp-oai-hands-on/cn
+     cd ~/iittp-oai-hands-on/openairinterface5g/doc/tutorial_resources/oai-cn5g
      docker compose down    # stop
 ```
 
