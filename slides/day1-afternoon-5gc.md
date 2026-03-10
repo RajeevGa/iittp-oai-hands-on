@@ -594,7 +594,7 @@ sequenceDiagram
 - <strong>Mutual authentication:</strong> The UE verifies the network (via AUTN) AND
 the network verifies the UE (via RES*)
 - **Pre-shared secrets:** Both UE (SIM) and UDM know **K** (secret key) and **OP/OPc**
-- These are the `key` and `opc` fields in your `ue.conf` and the CN database!
+- These are the `key` and `opc` fields in your `nrue.conf` and the CN database!
 
 ## Step 3: Security Mode & Registration Accept
 
@@ -680,7 +680,7 @@ Let's compare what Wireshark shows with the theory:
 
 Let's see what happens when authentication fails:
 
-1. **Change the SUPI** in `ue.conf` to a value not in the CN database
+1. **Change the SUPI** in `nrue.conf` to a value not in the CN database
 2. Restart the nrUE
 3. Watch the AMF logs:
    ```bash
@@ -688,7 +688,7 @@ Let's see what happens when authentication fails:
    ```
 4. Check Wireshark — do you see a Registration Reject?
 
-**Try also:** Change the `key` or `opc` in `ue.conf` (keep SUPI correct). What happens now? The UE is known but authentication fails — different error!
+**Try also:** Change the `key` or `opc` in `nrue.conf` (keep SUPI correct). What happens now? The UE is known but authentication fails — different error!
 
 ## Most Common Errors
 
@@ -696,8 +696,8 @@ Let's see what happens when authentication fails:
 |-------|-------|---------------|
 | NGAP Setup Failure | MCC/MNC mismatch between gNB and CN | gNB config vs CN config.yaml |
 | Unidentified/Illegal UE | SUPI not in CN database | CN database (oai_db.sql) |
-| Authentication Failure | Key or OPc mismatch | ue.conf vs CN database |
-| PDU Session Reject | DNN or SST mismatch | ue.conf vs CN config |
+| Authentication Failure | Key or OPc mismatch | nrue.conf vs CN database |
+| PDU Session Reject | DNN or SST mismatch | nrue.conf vs CN config |
 
 - **Debug tools:** 
   - Wireshark traces
