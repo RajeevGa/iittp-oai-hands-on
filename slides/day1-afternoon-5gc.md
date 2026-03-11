@@ -207,16 +207,17 @@ The 5G system has three main parts:
 
 
 
-## Installing OAI 5G Core {.action}
+## OAI 5G Core
 
 - Main repository  <https://gitlab.eurecom.fr/oai/cn5g>
 - Each NF has its own repository. Example: <https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf>
   - *oai-cn5g-amf* is meant for AMF NF
   - All OAI 5G CN NFs are dockerized
 
-## Clone the OAI RAN repository {.action}
+## Clone the OAI repository {.action}
 
-Open a new terminal and clone the ran repository (tag: 2026.w10)
+- Open a new terminal and clone the ran repository
+   - If you have already cloned it, just checkout the tag: 2026.w10
 
   ```bash
       cd ~/iittp-oai-hands-on 
@@ -256,22 +257,22 @@ All the docker containers should be `healthy`
   - docker ps -a
   - docker logs <container name> -f
 
-## OpenAirInterface Operating Modes
+## OAI Operating Modes
 
 <div style="display: flex; align-items: start; gap: 1em; margin-top: 0;">
 <div style="flex: 1; margin: 0; padding: 0;">
+
+- Over the air mode
+  - Using commercial or OAI UE, and OAI gNB
+  - Real-time operation
+  - Can use Software Defined Radios (SDRs) or Radio Units (RUs) for RF frontend 
 - RFsimulator mode
-  - No hardware and non real time
-  - No over the air transmissions
-  - Complete protocol stack except the RF part
+  - No RF hardware and over the air transmissions
+  - Complete protocol stack (Its not a network simulator!)
   - Can induce channel models between gNB and nrUE
   - Learning, development and testing protocols
-- RFsim is perfect for learning and protocol development because:
-    - No hardware needed — runs on any laptop
-    - Reproducible — no RF interference or hardware quirks
-    - Fast iteration — change config, restart, test in seconds
 
-**For this workshop:** We use rfsim so everyone can participate with just a laptop.
+**For this workshop:** We use rfsim so everyone can participate with just a laptop
 
 **In the lab:** We will also show a live over-the-air demo with real SDR hardware!
 
@@ -284,9 +285,11 @@ All the docker containers should be `healthy`
 </div>
 
 
-## Installing OAI gNB & UE
+## Installing OAI gNB & UE {.action}
 
-compile the gNB and nrUE (tag: 2026.w10)
+- We have already deployed the core network
+- Lets compile the gNB and nrUE (tag: 2026.w10)
+- Will use the build script
 
 ```bash
 cd ~/iittp-oai-hands-on/openairinterface5g
@@ -413,6 +416,10 @@ iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 20M
 
 - Lets close UE and gNB applications (type ctrl+c in the terminals)
 - Now let's understand what just happened under the hood...
+- For now, lets stop the gNB and UE applications
+  - Stop nrUE: Ctrl+c in the nrUE terminal
+  - Stop gNB: Ctrl+c in the gNB terminal
+
 
 <!-- ============================================================ -->
 <!-- SECTION 3: UNDERSTANDING WHAT HAPPENED                       -->
@@ -450,7 +457,7 @@ Before we look at the signaling, let's understand some parameters you configured
 - 🤝 **NG Setup Request / Response**
      - The gNB sends an **NG Setup Request** 
      - The AMF replies with an **NG Setup Response** 
-- ✅  Now the gNb is ready to serve UEs
+- ✅  Now the gNB is ready to serve UEs
 - Lets see the configuration files to see the parameters
   - Core: `~/iittp-oai-hands-on/cn/conf/config.yaml`
   - gNB: `~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf`
@@ -630,26 +637,21 @@ After this, the UE has a signaling connection. The network then sets up a **PDU 
 
 ## Capture Traces {.action}
 
-Let's capture the signaling. Stop your gNB and UE if running, then:
+- Let's capture the signaling
+- Stop your gNB and UE if running
+- Open a capture using Wireshark in a new terminal window
 
-```bash
-# Start tcpdump to capture on the CN bridge interface
-sudo tcpdump -i oai-cn5g -w monolithic.pcap
-```
+   ```bash
+    wireshark &
+   ```
+- Select "oai-cn5g" in the **Capture filter** 
+- Select **Display filter:**
 
-Now restart the gNB and UE (same commands as before). Let the UE connect fully, do a ping, then stop tcpdump with `Ctrl+C`.
+     ngap || nas-5gs
 
-Open the capture:
-
-```bash
-wireshark monolithic.pcap &
-```
-
-**Display filter:**
-
-```
-ngap || nas-5gs || pfcp || gtp
-```
+- Now restart the gNB and UE (same commands as before). 
+- Let the UE connect fully, do a ping.
+- Lets analyze the capture in wireshark
 
 ## Find the Registration Messages {.observe}
 
@@ -658,12 +660,14 @@ Find and analyze each one.
 
 |  |  | |  |
 |---|-----------|---------|-----------------|
-| 1 | gNB → AMF | **NGAP: InitialUEMessage** | Contains NAS Registration Request with SUCI |
-| 2 | AMF → gNB → UE | **NAS: Authentication Request** | Contains RAND and AUTN |
-| 3 | UE → gNB → AMF | **NAS: Authentication Response** | Contains RES* |
-| 4 | AMF → UE | **NAS: Security Mode Command** | Encryption algorithm selected |
-| 5 | UE → AMF | **NAS: Security Mode Complete** | |
-| 6 | AMF → UE | **NAS: Registration Accept** | Contains the assigned 5G-GUTI |
+| 1 | gNB → AMF | **NGAP Setup Request** | Contains gNB Id, Supported PLMN, etc. |
+| 2 | AMF → gNB | **NGAP Setup Response** | Failure cause (or) AMF Id and PLMN list in case of success |
+| 3 | gNB → AMF | **NGAP: InitialUEMessage** | Contains UE NAS PDU with SUCI for registration |
+| 4 | AMF → gNB → UE | **NAS: Authentication Request** | Contains RAND and AUTN |
+| 5 | UE → gNB → AMF | **NAS: Authentication Response** | Contains RES* |
+| 6 | AMF → UE | **NAS: Security Mode Command** | Encryption algorithm selected |
+| 7 | UE → AMF | **NAS: Security Mode Complete** | |
+| 8 | AMF → UE | **NAS: Registration Accept** | Contains the assigned 5G-GUTI |
 
 **Click on each message** and expand the NAS layer to see the actual field values.
 
@@ -679,21 +683,44 @@ Let's compare what Wireshark shows with the theory:
 
 4. **After Security Mode Command** — are subsequent NAS messages encrypted? How can you tell?
 
-5. **Find the 5G-GUTI** in the Registration Accept — this is the temporary ID the UE will use from now on
 
-## Experiment: What if the UE is Unknown? {.action}
+## Connecting  to a wrong network {.action}
 
-Let's see what happens when authentication fails:
+- Close the nrUE & gNB applications if thay are running
+- In seperate terminals run gNB and UE. But we will use different config file for UE!
+- Run the gNB same as before
+- For UE
 
-1. **Change the SUPI** in `nrue.conf` to a value not in the CN database
-2. Restart the nrUE
-3. Watch the AMF logs:
+    ```bash
+      cd ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build
+      sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue-imsi.conf
+    ```
+- Watch the AMF logs
+
    ```bash
    docker logs oai-amf -f
    ```
-4. Check Wireshark — do you see a Registration Reject?
+- Check Wireshark — do you see a Registration Reject?
 
-**Try also:** Change the `key` or `opc` in `nrue.conf` (keep SUPI correct). What happens now? The UE is known but authentication fails — different error!
+
+## SIM has compromised or a fake SIM {.action}
+
+- Close the nrUE & gNB applications if thay are running
+- In seperate terminals run gNB and UE. But we will use different config file for UE!
+- Run the gNB same as before
+- For UE
+
+    ```bash
+      cd ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build
+      sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue-key.conf
+    ```
+- Watch the AMF logs
+
+   ```bash
+   docker logs oai-amf -f
+   ```
+- Check Wireshark — do you see a Registration Reject? What happens to the authentication process?
+- Check UE logs
 
 ## Most Common Errors
 
@@ -702,14 +729,33 @@ Let's see what happens when authentication fails:
 | NGAP Setup Failure | MCC/MNC mismatch between gNB and CN | gNB config vs CN config.yaml |
 | Unidentified/Illegal UE | SUPI not in CN database | CN database (oai_db.sql) |
 | Authentication Failure | Key or OPc mismatch | nrue.conf vs CN database |
-| PDU Session Reject | DNN or SST mismatch | nrue.conf vs CN config |
 
 - **Debug tools:** 
   - Wireshark traces
   -  `docker logs oai-amf -f`
+  - UE and gNB logs 
+
+
+## Using a Commercial UE with OAI
+
+To use a **COTS phone/module** instead of the OAI softmodem UE, you need a **programmable SIM card**.
+
+- **Get a programmable USIM** — [Open-Cells](https://open-cells.com/index.php/sim-cards/) 
+- **Program it** with IMSI, Ki, OPc matching your CN database (`oai_db.sql`)
+  - Open-Cells tool: `program_uicc` 
+
+📖 Full guide: [OAI COTS UE Tutorial](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/NR_SA_Tutorial_COTS_UE.md)
+
+
+
+
 <!-- ============================================================ -->
 <!-- SECTION 5: WRAP-UP                                           -->
 <!-- ============================================================ -->
+
+
+
+
 
 ## Summary {.section-divider}
 
@@ -724,7 +770,7 @@ Let's see what happens when authentication fails:
 **Understood What Happened**
 
 - 5G Core architecture: SBA, NFs, what each does
-- UE identifiers: SUPI, SUCI, 5G-GUTI
+- UE identifiers
 - Registration and 5G-AKA authentication flow
 - Analyzed real signaling messages in Wireshark
 - Mapped config file parameters to protocol messages
@@ -735,7 +781,6 @@ Let's see what happens when authentication fails:
 **PDU Session & Data Plane (picking up where we left)**
 
 - How the UE gets its IP address (PDU session establishment)
-- PFCP: how SMF programs the UPF
 - GTP-U tunneling: how your data actually flows
 - QoS flows, 5QI, DRB mapping
 
@@ -762,17 +807,4 @@ For tomorrow, you'll need the same environment.
 
 **Don't delete** the OAI build — we'll use the same binaries tomorrow!
 
-
-## Thank You!
-
-
-**OAI Resources:**
-
-- OAI RAN: `https://gitlab.eurecom.fr/oai/openairinterface5g`
-- OAI CN5G: `https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g`
-- OAI Documentation: `https://openairinterface.org/`
-
-**Questions?**
-
-See you tomorrow for the data plane & RAN deep dive!
-
+**See you tomorrow!**
