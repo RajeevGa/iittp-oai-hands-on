@@ -20,7 +20,7 @@
 |---------|-------|
 | **Morning I** | PDU Session & Data Plane|
 | **Morning I** | RAN Protocol Stack|
-| **Morning II** | RAN Hands-on — experiments, scope visualizatio |
+| **Morning II** | RAN Hands-on — experiments, scope visualization|
 | **Afternoon** | RAN Hands-on, and advanced topics |
 
 ## 5G Protocol Stack
@@ -30,28 +30,37 @@
 <div style="flex: 1; margin: 0; padding: 0;">
 
 - **Control Plane**
-  - Non-Access Stratum (NAS): Functional layer to exchange control plane messages between UE and CN
+  - **Non-Access Stratum (NAS)**: Functional layer to exchange control plane messages between UE and CN
   - **Signaling** - Who is the user? Is she/he/it a valid one? where should the user data should go? How to handle Roaming?
-  - **Establishment and management of communication sessions (NAS-SM)**
-- **User Plan Function (UPF)**
+  - Establishment and management of communication sessions (NAS-SM)
+  - Mobility management (NAS-MM)
+  - Example NAS messages:  UE attach and registration, authentication etc.
+  - **AMF** handles control signaling with the UE and RAN
+- **User  Plane**
+  - Access Stratum (AS)
   - **SMF** programs the **UPF**
-  - Packet routing and forwarding
-  -  Packet inspection and user-plane part of policy rule enforcement
-  - QoS handling for user plane (packet filtering, UL/DL rate enforcement)
+  - **UPF** just forwards packets — it's told what to do by the SMF
+  - Actual data packets Ex: YouTube video
 </div>
 
 <div style="flex: 1;">
-  <img src="images/proto-nas.jpeg"
-       style="max-width: 80%; height: auto;">
+<div style="display: flex; flex-direction: column; align-items: center;">
+  <img src="images/proto-nas.jpeg" style="max-width: 80%; height: auto;">
+  <p class="caption"><small>Control Plane</small></p>
+<img src="images/proto-as.jpeg" style="max-width: 85%; height: auto;">
+  <p class="caption"><small>User Plane</small></p>
+</div>
 
-  <img src="images/proto-as.jpeg"
-       alt="End-to-end 5G architecture: UE — RAN — Core — Internet"
-       style="max-width: 80%; height: auto;">
-  <p class="caption"></small> End-to-end 5G system — UE connects through RAN to Core Network and onward to the Internet </small></p>
-
+<small>
+  **NR-Uu:** Radio interface (UE ↔ gNB)
+  **N2:** gNB ↔ AMF — NGAP over SCTP
+  **N11:** AMF ↔ SMF — HTTP/2 (Service-Based Interface)
+</small>
 </div>
 
 </div>
+
+
 
 <!-- ============================================================ -->
 <!-- SESSION 1: PDU SESSION & DATA PLANE                          -->
@@ -115,7 +124,7 @@ When you ping from UE, the packet travels like this:
 
 </small>
 
-- UE Ip packet is 
+- UE IP packet is 
    - Tagged with QoS Flow Identifier (QFI)
    - Tunneled with GTP-U (GPRS Tunneling Protocol – User Plane)
    - Transparent to RAN
@@ -174,8 +183,11 @@ Click on a GTP-U packet and expand:
        style="max-width: 95%; height: auto;">
 </div>
 <div style="flex: 1;">
-  <img src="images/proto-as.jpeg"
-       style="max-width: 95%; height: auto;">
+<div style="display: flex; flex-direction: column; align-items: center;">
+<img src="images/proto-as.jpeg" style="max-width: 95%; height: auto;">
+  <p class="caption"><small>User Plane</small></p>
+</div>
+
  - Quality of Service (QoS)
    - Guaranteed bit rate (GBR) and non-GBR
 </div>
@@ -306,7 +318,7 @@ Click on a GTP-U packet and expand:
 </div>
 
 
-## MAC 
+## Medium Access Control (MAC) 
 
 <div style="display: flex; align-items: start; gap: 2em;">
 <div style="flex: 1;">
@@ -314,55 +326,16 @@ Click on a GTP-U packet and expand:
 </div>
 <div style="flex: 1;">
 
-- Scheduling and Transport Block (TB) construction **[3GPP TS 38.321]**
+- Medium Access Control [3GPP TS 38.321]
 - Multiplexing — logical channels → Transport Block
+- Multiplexing of transport channels and forming the Transport Block (TB)
 - Scheduling — which UE, how many resoursess, at which rate?
-- HARQ — Error correction at TB level 
-- Timing and power control loops
+- Error correction at TB level through HARQ
+- Maintaining UE synchronization
+- Adaptive modulation (mcs), power control
 
 </div>
 </div>
-
-## MAC — Scheduling
-
-:::::::::::::: {.columns}
-::: {.column width="50%"}
-![](images/mac-scheduler.png)
-:::
-::: {.column width="50%"}
-
-The scheduler runs **every slot** and decides:
-
-- **Which PRBs?** (frequency resources)
-- **Which MCS?** (based on CQI feedback)
-- **How much data?** (based on BSR)
-
-**Inputs:** RLC buffers, CQI, HARQ status, QoS
-
-**Algorithms:**
-
-| | Rule |
-|---|------|
-| **Round Robin** | Equal turns |
-| **Max Throughput** | Best channel first |
-| **Proportional Fair** | Best relative channel |
-
-:::
-::::::::::::::
-
----
-
-## MAC — HARQ
-
-If a TB has errors → receiver sends **NACK** → transmitter retransmits.
-
-5G uses **Incremental Redundancy HARQ**:
-
-- First TX sends coded bits (RV0)
-- Retransmission sends **different** bits (RV2, RV3, RV1)
-- Receiver **combines** all attempts
-
-Faster than RLC retransmission. Operates at TB level, within a few ms.
 
 ## Analogy
 
@@ -386,36 +359,11 @@ Faster than RLC retransmission. Operates at TB level, within a few ms.
 </div>
 
 
-## PHY — Physical Layer {.section-divider}
+## PHY — Physical Layer
 
----
 
-## PHY — What It Does
-
-:::::::::::::: {.columns}
-::: {.column width="50%"}
-![](images/phy-resource-grid.png)
-:::
-::: {.column width="50%"}
-
-Bits become radio waves:
-
-- **OFDM** — data across many subcarriers
-- **Modulation** — QPSK, 16QAM, 64QAM, 256QAM
-- **Channel coding** — LDPC (data), Polar (control)
-- **MIMO** — multiple antennas
-- **Channel estimation** — constant measurement
-
-**Resource Grid:** frequency (RBs) × time (slots)
-
-One **Resource Element** = 1 subcarrier × 1 OFDM symbol
-
-:::
-::::::::::::::
-
----
-
-## PHY — Physical Channels
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
 
 | Channel | Direction | What it carries |
 |---------|-----------|----------------|
@@ -425,6 +373,22 @@ One **Resource Element** = 1 subcarrier × 1 OFDM symbol
 | **PUCCH** | Uplink | CQI, HARQ ACK/NACK |
 | **PRACH** | Uplink | Random access preamble |
 | **PBCH** | Downlink | Master Information Block |
+
+</div>
+
+<div style="flex: 1;">
+ Channels are mapped on
+
+- **Resource Grid:** frequency (RBs) × time (slots)
+- **OFDM** — data across many subcarriers
+- **Modulation** — QPSK, 16QAM, 64QAM, 256QAM
+- **Channel coding** — LDPC (data), Polar (control)
+- **MIMO** — multiple antennas
+- **Channel estimation** — constant measurement
+
+</div>
+</div>
+
 
 
 ## OAI Code Pointers
@@ -475,7 +439,7 @@ What you can see:
 ## Launch with Scope {.action}
 
 ```bash
-cd ~/openairinterface5g/cmake_targets/ran_build/build
+cd ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build
 ```
 
 gNB with scope
@@ -534,7 +498,7 @@ sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --
 
 Folder:
 ```bash
-cd ~/openairinterface5g/cmake_targets/ran_build/build
+cd ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build
 ```
 
 Add to gNB and UE config:
@@ -559,31 +523,6 @@ sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --
 
 ---
 
-## Experiment 1: Different Modulations (phy-test) {.action}
-
-Folder:
-```bash
-cd ~/openairinterface5g/cmake_targets/ran_build/build
-```
-
-gNB in phy-test mode
-```bash
-sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server -d --phy-test
-```
-
-nrUE in phy-test mode
-```bash
-sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -d --phy-test
-```
-
-
-**Exercise:** Change MCS in scope:
-
-- MCS 4 → QPSK → 4 points
-- MCS 15 → 16QAM → 16 points
-- MCS 25 → 64QAM → 64 points
-
----
 
 ## Experiment 2: TDD Pattern {.action}
 
@@ -615,7 +554,7 @@ nrofUplinkSymbols              = 4;
 
 Folder:
 ```bash
-cd ~/openairinterface5g/cmake_targets/ran_build/build
+cd ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build
 ```
 
 **20 MHz (51 PRBs):**
@@ -648,7 +587,7 @@ sudo ./nr-uesoftmodem -r 273 --numerology 1 --band 78 -C 3649260000 --ssb 516 --
 
 Folder:
 ```bash
-cd ~/openairinterface5g/cmake_targets/ran_build/build
+cd ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build
 ```
 
 Make `multi-ue.sh` as executable
@@ -713,7 +652,7 @@ sudo ~/iittp-oai-hands-on/ran/multi-ue.sh -d1 -d2
 
 **Day 2 — Data Plane & RAN**
 
-- PDU session establishment and PFCP
+- PDU session establishment
 - GTP-U tunneling
 - RAN protocol stack: SDAP → PDCP → RLC → MAC → PHY
 - OAI scope visualization
@@ -721,12 +660,7 @@ sudo ~/iittp-oai-hands-on/ran/multi-ue.sh -d1 -d2
 
 ---
 
-## Where to Go From Here
-
-- Over-the-air with real SDR hardware (USRP, AW2S)
-- CU-DU split (F1 interface)
-- FlexRIC for O-RAN xApps
-- Contribute to OAI open source!
+## Want to explore more?
 
 **Resources:**
 
