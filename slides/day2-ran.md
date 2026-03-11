@@ -450,8 +450,18 @@ One **Resource Element** = 1 subcarrier × 1 OFDM symbol
 
 | Tool | How to build | How to use |
 |------|-------------|------------|
-| **nrscope** | Built automatically | Run with `-d` flag |
-| **nrqtscope** | `./build_oai --build-lib nrqtscope --ninja` | Run with `-d --XFORMS` |
+| **nrscope** | `./build_oai --build-lib nrscope --ninja` | Run with `-d` flag |
+
+❗Note: If you get the following error while compiling scope
+
+```bash
+CMake Error at openair1/PHY/TOOLS/CMakeLists.txt:38 (message):
+  required library forms not found for building scopes
+```
+Install the required package
+```bash
+sudo apt-get install libforms-dev
+```
 
 What you can see:
 
@@ -465,19 +475,17 @@ What you can see:
 ## Launch with Scope {.action}
 
 ```bash
-# gNB with scope
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E ./nr-softmodem --rfsim \
-  -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf \
-  -d
 ```
 
+gNB with scope
 ```bash
-# UE with scope
-sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
-  -C 3619200000 --rfsim --ssb 516 \
-  -O ~/iittp-oai-hands-on/ran/conf/ue.conf \
-  -d
+sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server -d
+```
+
+UE with scope
+```bash
+sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue.conf -d
 ```
 
 ❗ Remote VM? Use **X11 forwarding**: `ssh -X user@host`
@@ -488,7 +496,7 @@ sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
 
 :::::::::::::: {.columns}
 ::: {.column width="50%"}
-![](images/scope-gnb.jpg)
+![](images/gNB_scope.png)
 :::
 ::: {.column width="50%"}
 
@@ -507,7 +515,7 @@ sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
 
 :::::::::::::: {.columns}
 ::: {.column width="50%"}
-![](images/scope-ue.jpg)
+![](images/ue_scope.png)
 :::
 ::: {.column width="50%"}
 
@@ -524,7 +532,12 @@ sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
 
 ## Channel Model with RFsim {.action}
 
-Add to gNB config:
+Folder:
+```bash
+cd ~/openairinterface5g/cmake_targets/ran_build/build
+```
+
+Add to gNB and UE config:
 
 ```
 @include "channelmod_rfsimu.conf"
@@ -532,11 +545,14 @@ Add to gNB config:
 
 Launch UE with channel model:
 
+gNB:
 ```bash
-sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
-  -C 3619200000 --rfsim --ssb 516 \
-  -O ~/iittp-oai-hands-on/ran/conf/ue.conf \
-  -d --rfsimulator.options chanmod
+sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server --rfsimulator.[0].options chanmod --rfsimulator.[0].modelname AWGN -d
+```
+
+nrUE:
+```bash
+sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue.conf -d --rfsimulator.options chanmod --rfsimulator.modelname AWGN
 ```
 
 **Watch:** Constellations spread out with noise and fading.
@@ -545,16 +561,21 @@ sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
 
 ## Experiment 1: Different Modulations (phy-test) {.action}
 
+Folder:
 ```bash
-# gNB in phy-test mode
-sudo -E ./nr-softmodem --rfsim \
-  -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf \
-  --phy-test -d
-
-# UE in phy-test mode
-sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
-  -C 3619200000 --rfsim --phy-test --nokrnmod 1 -d
+cd ~/openairinterface5g/cmake_targets/ran_build/build
 ```
+
+gNB in phy-test mode
+```bash
+sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server -d --phy-test
+```
+
+nrUE in phy-test mode
+```bash
+sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -d --phy-test
+```
+
 
 **Exercise:** Change MCS in scope:
 
@@ -592,26 +613,31 @@ nrofUplinkSymbols              = 4;
 
 ## Experiment 3: Bandwidth {.action}
 
+Folder:
+```bash
+cd ~/openairinterface5g/cmake_targets/ran_build/build
+```
+
 **20 MHz (51 PRBs):**
 
+gNB:
 ```bash
-sudo -E ./nr-softmodem --rfsim \
-  -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.51prb.rfsim.conf
-
-sudo -E ./nr-uesoftmodem -r 51 --numerology 1 --band 78 \
-  -C 3609300000 --rfsim --ssb 228 \
-  -O ~/iittp-oai-hands-on/ran/conf/ue.conf
+sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.51PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server
+```
+nrUE:
+```bash
+sudo ./nr-uesoftmodem -r 51 --numerology 1 --band 78 -C 3609300000 --ssb 228 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue.conf -d 
 ```
 
 **100 MHz (273 PRBs):**
 
+gNB:
 ```bash
-sudo -E ./nr-softmodem --rfsim \
-  -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.273prb.rfsim.conf
-
-sudo -E ./nr-uesoftmodem -r 273 --numerology 1 --band 78 \
-  -C 3649260000 --rfsim --ssb 516 \
-  -O ~/iittp-oai-hands-on/ran/conf/ue.conf
+sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.273PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server
+```
+nrUE:
+```bash
+sudo ./nr-uesoftmodem -r 273 --numerology 1 --band 78 -C 3649260000 --ssb 516 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue.conf -d 
 ```
 
 **Exercise:** Compare throughput at 20MHz vs 40MHz vs 100MHz.
@@ -620,24 +646,31 @@ sudo -E ./nr-uesoftmodem -r 273 --numerology 1 --band 78 \
 
 ## Experiment 4: Multiple UEs {.action}
 
+Folder:
 ```bash
-# gNB
-sudo -E ./nr-softmodem --rfsim \
-  -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf
+cd ~/openairinterface5g/cmake_targets/ran_build/build
+```
 
-# UE1
+Make `multi-ue.sh` as executable
+```bash
+chmod +x ~/iittp-oai-hands-on/ran/multi-ue.sh
+```
+
+gNB
+```bash
+sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server
+```
+
+UE1
+```bash
 sudo ~/iittp-oai-hands-on/ran/multi-ue.sh -c1 -e
-sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
-  -C 3619200000 --rfsim \
-  -O ~/iittp-oai-hands-on/ran/conf/ue1.conf \
-  --rfsimulator.serveraddr 10.201.1.100
+sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -O /home/oai/iittp-oai-hands-on/ran/conf/ue1.conf --rfsimulator.serveraddr 10.201.1.100
+```
 
-# UE2
+UE2
+```bash
 sudo ~/iittp-oai-hands-on/ran/multi-ue.sh -c2 -e
-sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 \
-  -C 3619200000 --rfsim \
-  -O ~/iittp-oai-hands-on/ran/conf/ue2.conf \
-  --rfsimulator.serveraddr 10.202.1.100
+sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --rfsim -O /home/oai/iittp-oai-hands-on/ran/conf/ue2.conf --rfsimulator.serveraddr 10.202.1.100
 ```
 
 ---
