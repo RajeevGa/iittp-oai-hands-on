@@ -134,8 +134,8 @@ The 5G system has three main parts:
 
 - **5G core design choices**
   - Dividing monolithic element into smaller Network Functions (NFs)
-  - Service-based architecture is based on a set of NFs
   - Virtualization
+  - Service-based architecture (SBA) 
   - NFs communicate over a common bus via APIs.
   - Each NF registers with the NRF and can discover/consume services from other NFs dynamically
 
@@ -185,7 +185,7 @@ The 5G system has three main parts:
   - Access Stratum (AS)
   - **SMF** programs the **UPF** 
   - **UPF** just forwards packets — it's told what to do by the SMF
-  - Actual data packets Ex: YouTube video, Arattai
+  - Actual data packets Ex: YouTube video
 </div>
 
 <div style="flex: 1;">
@@ -389,7 +389,8 @@ ping -I oaitun_ue1 192.168.70.135
 docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
-The IP address `192.168.70.135` is the IP address of the `oai-ext-dn` container.
+- The IP address `192.168.70.135` is the IP address of the `oai-ext-dn` container.
+- The `oai-ext-dn` container is mimicking the Internet here!
 
 ---
 
@@ -449,11 +450,11 @@ Before we look at the signaling, let's understand some parameters you configured
 
 **nrUE:** `~/iittp-oai-hands-on/ran/conf/nrue.conf`
 
+
 ## Connecting gNB and Core Network
 
 - Before any UE can register, the gNB itself must first connect to the 5G Core.
 - Happens through the **NGAP** (Next Generation Application Protocol) over the **N2 interface**.
-- gNB establishes an SCTP transport connection to the AMF in the core network.
 - 🤝 **NG Setup Request / Response**
      - The gNB sends an **NG Setup Request** 
      - The AMF replies with an **NG Setup Response** 
@@ -462,7 +463,9 @@ Before we look at the signaling, let's understand some parameters you configured
   - Core: `~/iittp-oai-hands-on/cn/conf/config.yaml`
   - gNB: `~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf`
 
+
 ## Steps in Connecting a UE
+
 <div style="display: flex; align-items: start; gap: 1em; margin-top: 0;">
 <div style="flex: 1; margin: 0; padding: 0;">
 When you turn on your phone or enter a new coverage area, it needs to **register** with the network before it can make calls or use data. 
@@ -564,21 +567,121 @@ sequenceDiagram
     UE-->>AMF: Registration Complete
 ```
 
-
-## Step 1: Registration Request
-
+## Procedures — Step by Step
+ 
+### Phase 1: NG Setup (gNB Connects to Core)
+ 
+- This is the very first exchange when a gNB starts up. 
+- It is **non-UE-associated** — no users are involved yet.
+ 
 ```
-UE → gNB → AMF
+gNB                                  AMF
+ │                                    │
+ │──── NGSetupRequest ───────────────►│
+ │     • GlobalRANNodeID              │
+ │     • Supported Tracking Areas     │
+ │     • Paging DRX                   │
+ │                                    │
+ │◄─── NGSetupResponse ──────────────│
+ │     • AMF Name                     │
+ │     • Served GUAMI List            │
+ │     • PLMN Support List            │
+ │     • Relative AMF Capacity        │
+ │                                    │
 ```
+ 
+- The gNB introduces itself and AMF responds
+- After this, the gNB is ready to accept UE connections
+ 
+ 
+### Phase 2: UE Registration
+ 
+When a UE (phone) turns on and wants to connect to the network.
+ 
+#### Step 1: Initial UE Message
+ 
+```
+UE            gNB                                  AMF
+ │              │                                    │
+ │──NAS Reg───►│                                    │
+ │  Request     │──── InitialUEMessage ─────────────►│
+ │              │     • RAN-UE-NGAP-ID              │
+ │              │     • NAS-PDU: Registration Request │
+ │              │                                    │
+```
+ 
+- This is the first UE-associated NGAP message
+- The gNB assigns a RAN-UE-NGAP-ID to track this UE
+- The NAS Registration Request is carried as a payload — the gNB doesn't read it
+ 
+#### Step 2: Authentication (NAS Transport)
+ 
+```
+UE            gNB                                  AMF
+ │              │                                    │
+ │              │◄── DownlinkNASTransport ───────────│
+ │◄──NAS──────│     • AMF-UE-NGAP-ID                │
+ │  Auth Req    │     • RAN-UE-NGAP-ID              │
+ │              │     • NAS-PDU: Auth Request       │
+ │              │                                    │
+ │──NAS──────►│                                    │
+ │  Auth Resp   │──── UplinkNASTransport ───────────►│
+ │              │     • NAS-PDU: Auth Response        │
+ │              │                                    │
+```
+ 
+- AMF assigns its own AMF-UE-NGAP-ID
+- AMF sends Authentication Request via DownlinkNASTransport
+- UE responds with Auth Response via UplinkNASTransport
+- Behind the scenes: AMF talks to AUSF → UDM → UDR to verify credentials
+ 
+#### Step 3: Security Mode (NAS Transport)
+ 
+```
+UE            gNB                                  AMF
+ │              │                                    │
+ │              │◄── DownlinkNASTransport ───────────│
+ │◄──NAS──────│     • NAS-PDU: Security Mode Command │
+ │  SMC         │                                    │
+ │              │                                    │
+ │──NAS──────►│                                    │
+ │  SM Complete │──── UplinkNASTransport ───────────►│
+ │              │     • NAS-PDU: Security Mode Complete│
+ │              │                                    │
+```
+ 
+- AMF sends Security Mode Command to activate encryption and integrity protection
+- From this point onwards, NAS messages are encrypted
+ 
+#### Step 4: Initial Context Setup
+ 
+```
+gNB                                  AMF
+ │                                    │
+ │◄── InitialContextSetupRequest ────│
+ │    • AMF-UE-NGAP-ID               │
+ │    • RAN-UE-NGAP-ID               │
+ │    • Security Key                  │
+ │    • UE Security Capabilities      │
+ │    • Allowed NSSAI (slices)        │
+ │    • NAS-PDU: Registration Accept  │
+ │    • (Optional: PDU Session        │
+ │       Resource Setup List)         │
+ │                                    │
+ │── InitialContextSetupResponse ───►│
+ │    • PDU Session Resource          │
+ │      Setup Response List           │
+ │                                    │
+```
+ 
+- AMF sends security keys and UE capabilities to the gNB
+- The NAS Registration Accept is included — tells the UE "you're in"
+ 
+---
+ 
 
-- UE creates a **NAS Registration Request** containing its **SUCI**
-- This NAS message is wrapped inside **RRC** (radio) and delivered to gNB
-- gNB wraps it in **NGAP** (N2) and forwards to AMF
-- AMF receives the SUCI and now needs to authenticate the UE
 
-**Remember:** In RFsim mode, the radio part is simulated, but the NAS and NGAP messages are **real** — exactly what you'd see on a live network.
-
-## Step 2: 5G-AKA Authentication
+##  5G-AKA Authentication
 
 ```{.mermaid}
 sequenceDiagram
@@ -608,24 +711,6 @@ the network verifies the UE (via RES*)
 - **Pre-shared secrets:** Both UE (SIM) and UDM know **K** (secret key) and **OP/OPc**
 - These are the `key` and `opc` fields in your `nrue.conf` and the CN database!
 
-## Step 3: Security Mode & Registration Accept
-
-After successful authentication:
-
-1. **AMF → UE: Security Mode Command**
-   - Tells UE which encryption and integrity algorithms to use
-   - From this point, all NAS messages are encrypted
-
-2. **UE → AMF: Security Mode Complete**
-   - UE confirms it can encrypt/decrypt
-
-3. **AMF → UE: Registration Accept**
-   - AMF assigns a **5G-GUTI** (temporary ID)
-   - UE is now registered on the network
-
-4. **UE → AMF: Registration Complete**
-
-After this, the UE has a signaling connection. The network then sets up a **PDU Session** to create the data path — that's how your UE got the IP address and could ping. We'll cover PDU sessions in detail tomorrow.
 
 
 <!-- ============================================================ -->
@@ -802,9 +887,9 @@ For tomorrow, you'll need the same environment.
  2. Stop gNB: Ctrl+C in the gNB terminal
  3. Stop CN: 
      cd ~/iittp-oai-hands-on/openairinterface5g/doc/tutorial_resources/oai-cn5g
-     docker compose down    # stop
+     docker compose down    # stop and remove containers
 ```
 
-**Don't delete** the OAI build — we'll use the same binaries tomorrow!
+**Don't delete** the OAI build & core network images— we'll use the same binaries tomorrow!
 
 **See you tomorrow!**

@@ -135,17 +135,10 @@ When you ping from UE, the packet travels like this:
 
 ## Find PDU Session & GTP-U in Wireshark {.action}
 
-Restart your network if needed. Start capture:
-
-```bash
-sudo tcpdump -i oai-cn5g -w day2.pcap
-```
-
-Launch gNB, UE, do a few pings, then stop tcpdump.
-
-```bash
-wireshark day2.pcap &
-```
+ - Restart your network as in day 1
+ -  Start capture using Wireshark
+ - Launch gNB, UE
+ - Do a few pings, then stop
 
 **Find these messages:**
 
