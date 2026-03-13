@@ -517,7 +517,7 @@ sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --
 ---
 
 
-## Experiment 2: TDD Pattern {.action}
+## TDD Pattern {.action}
 
 **5ms pattern (default):**
 
@@ -543,7 +543,7 @@ nrofUplinkSymbols              = 4;
 
 ---
 
-## Experiment 3: Bandwidth {.action}
+## Bandwidth {.action}
 
 Folder:
 ```bash
@@ -561,22 +561,11 @@ nrUE:
 sudo ./nr-uesoftmodem -r 51 --numerology 1 --band 78 -C 3609300000 --ssb 228 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue.conf -d 
 ```
 
-**100 MHz (273 PRBs):**
-
-gNB:
-```bash
-sudo ./nr-softmodem -O ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.273PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 --rfsim --rfsimulator.[0].serveraddr server
-```
-nrUE:
-```bash
-sudo ./nr-uesoftmodem -r 273 --numerology 1 --band 78 -C 3649260000 --ssb 516 --rfsim -O ~/iittp-oai-hands-on/ran/conf/nrue.conf -d 
-```
-
-**Exercise:** Compare throughput at 20MHz vs 40MHz vs 100MHz.
+**Exercise:** Compare throughput at 20MHz vs 40MHz.
 
 ---
 
-## Experiment 4: Multiple UEs {.action}
+## Multiple UEs {.action}
 
 Folder:
 ```bash
