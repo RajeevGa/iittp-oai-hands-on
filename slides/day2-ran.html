@@ -6,14 +6,88 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>day2-ran</title>
+  <meta name="author" content="OAI 5G NR Workshop — IIT Tirupati" />
+  <title>5G Data Plane &amp; RAN Hands-on</title>
   <style type="text/css">
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" type="text/css" media="screen, projection, print"
     href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
@@ -56,8 +130,790 @@
     charset="utf-8" type="text/javascript"></script>
 </head>
 <body>
-<div class="slide section level2">
+<div class="slide titlepage">
+  <h1 class="title">5G Data Plane &amp; RAN Hands-on</h1>
+  <p class="author">
+OAI 5G NR Workshop — IIT Tirupati
+  </p>
+  <p class="date">March 15, 2026 | Day 2</p>
+</div>
+<div id="quick-recap-day-1" class="slide section level2">
+<h1>Quick Recap — Day 1</h1>
+<ul>
+<li>Deployed OAI 5G Core (docker) + gNB + nrUE in rfsim</li>
+<li>Got an IP address to UE, ping, ran iperf</li>
+<li>Understood registration and authentication procedures</li>
+<li>Analyzed messages in Wireshark</li>
+<li><strong>Things we skipped:</strong>
+<ul>
+<li>How did the UE actually get its IP address?</li>
+<li>How does your ping packet travel from UE to the core?</li>
+<li>How do UE and gNB (cell tower) communicate over the air?</li>
+</ul></li>
+</ul>
+</div>
+<div id="day-2-agenda" class="slide section level2">
+<h1>Day 2 — Agenda</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Session</th>
+<th>Topic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Morning I</strong></td>
+<td>PDU Session &amp; Data Plane</td>
+</tr>
+<tr class="even">
+<td><strong>Morning I</strong></td>
+<td>RAN Protocol Stack</td>
+</tr>
+<tr class="odd">
+<td><strong>Morning II</strong></td>
+<td>RAN Hands-on — experiments, scope visualization</td>
+</tr>
+<tr class="even">
+<td><strong>Afternoon</strong></td>
+<td>RAN Hands-on, and advanced topics</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="g-protocol-stack" class="slide section level2">
+<h1>5G Protocol Stack</h1>
+<div
+style="display: flex; align-items: start; gap: 2em; margin-top: 0;">
+<div style="flex: 1; margin: 0; padding: 0;">
+<ul>
+<li><strong>Control Plane</strong>
+<ul>
+<li><strong>Non-Access Stratum (NAS)</strong>: Functional layer to
+exchange control plane messages between UE and CN</li>
+<li><strong>Signaling</strong> - Who is the user? Is she/he/it a valid
+one? where should the user data should go? How to handle Roaming?</li>
+<li>Establishment and management of communication sessions (NAS-SM)</li>
+<li>Mobility management (NAS-MM)</li>
+<li>Example NAS messages: UE attach and registration, authentication
+etc.</li>
+<li><strong>AMF</strong> handles control signaling with the UE and
+RAN</li>
+</ul></li>
+<li><strong>User Plane</strong>
+<ul>
+<li>Access Stratum (AS)</li>
+<li><strong>SMF</strong> programs the <strong>UPF</strong></li>
+<li><strong>UPF</strong> just forwards packets — it’s told what to do by
+the SMF</li>
+<li>Actual data packets Ex: YouTube video</li>
+</ul></li>
+</ul>
+</div>
+<div style="flex: 1;">
+<div
+style="display: flex; flex-direction: column; align-items: center;">
+<img src="images/proto-nas.jpeg" style="max-width: 80%; height: auto;">
+<p class="caption">
+<small>Control Plane</small>
+</p>
+<img src="images/proto-as.jpeg" style="max-width: 85%; height: auto;">
+<p class="caption">
+<small>User Plane</small>
+</p>
+</div>
+<p><small> <strong>NR-Uu:</strong> Radio interface (UE ↔︎ gNB)
+<strong>N2:</strong> gNB ↔︎ AMF — NGAP over SCTP <strong>N11:</strong>
+AMF ↔︎ SMF — HTTP/2 (Service-Based Interface) </small></p>
+</div>
+</div>
+<!-- ============================================================ -->
+<!-- SESSION 1: PDU SESSION & DATA PLANE                          -->
+<!-- ============================================================ -->
+</div>
+<div id="pdu-session" class="slide section level2">
+<h1>PDU Session</h1>
+<p><strong>Packet Data Unit (PDU) Session</strong> — a data pipe from UE
+to the internet.</p>
+<div class="key-concept">
+<strong>PDU Session =</strong> An end-to-end data path with:
+<ul>
+<li>
+An <strong>IP address</strong> for the UE (that’s the 10.0.0.x you saw!)
+</li>
+<li>
+<strong>QoS rules</strong> defining how traffic is handled
+</li>
+<li>
+A <strong>DNN</strong> (Data Network Name) — configured in your ue.conf
+</li>
+</ul>
+</div>
+</div>
+<div id="pdu-session-setup-what-happened-after-registration"
+class="slide section level2">
+<h1>PDU Session Setup — What Happened After Registration</h1>
+<pre class="mermaid"><code>sequenceDiagram
+    participant UE
+    participant gNB
+    participant AMF
+    participant SMF
+    participant UPF
 
+    UE-&gt;&gt;AMF: PDU Session Establishment Request (NAS-SM)
+    Note over AMF: AMF selects SMF
+
+    AMF-&gt;&gt;SMF: Nsmf_PDUSession_CreateSMContext
+    SMF-&gt;&gt;UPF: PFCP Session Establishment (PDR, FAR, QER)
+    UPF--&gt;&gt;SMF: PFCP Session Establishment Response
+
+    SMF--&gt;&gt;AMF: N1N2 Message Transfer
+    AMF-&gt;&gt;gNB: NGAP PDU Session Resource Setup Request
+    Note over gNB: gNB allocates radio resources (DRB)
+    gNB-&gt;&gt;UE: RRC Reconfiguration (PDU Session Accept)
+    UE--&gt;&gt;gNB: RRC Reconfiguration Complete
+
+    gNB--&gt;&gt;AMF: NGAP PDU Session Resource Setup Response
+    AMF-&gt;&gt;SMF: Update SM Context
+    SMF-&gt;&gt;UPF: PFCP Session Modification
+
+    Note over UE,UPF: Data path ready!</code></pre>
+</div>
+<div id="gtp-u-your-packet-inside-a-tunnel"
+class="slide section level2">
+<h1>GTP-U — Your Packet Inside a Tunnel</h1>
+<p>When you ping from UE, the packet travels like this:</p>
+<div class="diagram">
+<p><img src="images/end-to-end-ip.jpeg"
+       alt="End-to-end 5G architecture: UE — RAN — Core — Internet"></p>
+</div>
+<p></small></p>
+<ul>
+<li>UE IP packet is
+<ul>
+<li>Tagged with QoS Flow Identifier (QFI)</li>
+<li>Tunneled with GTP-U (GPRS Tunneling Protocol – User Plane)</li>
+<li>Transparent to RAN </small></li>
+</ul></li>
+</ul>
+</div>
+<div id="find-pdu-session-gtp-u-in-wireshark"
+class="slide section level2 action">
+<h1 class="action">Find PDU Session &amp; GTP-U in Wireshark</h1>
+<ul>
+<li>Restart your network as in day 1</li>
+<li>Start capture using Wireshark</li>
+<li>Launch gNB, UE</li>
+<li>Do a few pings, then stop</li>
+</ul>
+<p><strong>Find these messages:</strong></p>
+<table>
+<colgroup>
+<col width="8%" />
+<col width="29%" />
+<col width="26%" />
+<col width="35%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Protocol</th>
+<th>Message</th>
+<th>What to Look For</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>PFCP</td>
+<td><strong>Session Establishment Request</strong></td>
+<td>PDR and FAR rules from SMF to UPF</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>PFCP</td>
+<td><strong>Session Establishment Response</strong></td>
+<td>UPF confirms</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>NGAP</td>
+<td><strong>PDU Session Resource Setup</strong></td>
+<td>QoS info, tunnel info</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>GTP-U</td>
+<td><strong>G-PDU</strong></td>
+<td>Your ping packet inside the tunnel!</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="observe-gtp-u-packets" class="slide section level2 observe">
+<h1 class="observe">Observe GTP-U Packets</h1>
+<p>Filter for GTP:</p>
+<pre><code>gtp</code></pre>
+<p>Click on a GTP-U packet and expand:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Outer IP header:</strong> gNB IP ↔︎ UPF IP</li>
+<li><strong>UDP header:</strong> Port 2152</li>
+<li><strong>GTP-U header:</strong> TEID value</li>
+<li><strong>Inner IP header:</strong> UE IP ↔︎ ping target</li>
+</ol>
+<p><strong>This is the tunnel!</strong> Your ping is wrapped inside
+GTP-U between gNB and UPF.</p>
+</div>
+<div id="user-plane-ran-protocol-stack" class="slide section level2">
+<h1>User Plane RAN Protocol Stack</h1>
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
+<p><img src="images/ip-qos-flow.jpeg"
+       style="max-width: 95%; height: auto;"></p>
+</div>
+<div style="flex: 1;">
+<div
+style="display: flex; flex-direction: column; align-items: center;">
+<img src="images/proto-as.jpeg" style="max-width: 95%; height: auto;">
+<p class="caption">
+<small>User Plane</small>
+</p>
+</div>
+<ul>
+<li>Quality of Service (QoS)
+<ul>
+<li>Guaranteed bit rate (GBR) and non-GBR</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="user-plane-ran-protocol-stack-1" class="slide section level2">
+<h1>User Plane RAN Protocol Stack</h1>
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
+<p><img src="images/ip-qos-flow.jpeg"
+       style="max-width: 95%; height: auto;"></p>
+</div>
+<div style="flex: 1;">
+<p><img src="images/ran-proto-entire.jpeg"
+       style="max-width: 95%; height: auto;"></p>
+</div>
+</div>
+</div>
+<div id="analogy-ordering-on-an-e-commerce-platform"
+class="slide section level2">
+<h1>Analogy: Ordering on an e-commerce platform</h1>
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
+<p><img src="images/analogy.png" style="max-width: 85%; height: auto;"></p>
+</div>
+<div style="flex: 1;">
+<ul>
+<li>Think of an e-commerce platform as your 5G operator</li>
+<li>Once registered, you can order from various vendors</li>
+<li>Lets look at a hypothetical delivery system
+<ul>
+<li><strong>Alice and Bob</strong> each order items with different
+urgency:
+<ul>
+<li>🥬 <strong>Fresh</strong> — same-day, perishable</li>
+<li>💻 <strong>Prime</strong> — next-day, guaranteed</li>
+<li>🧹 <strong>Normal</strong> — whenever, best effort</li>
+</ul></li>
+</ul></li>
+<li>How an order turned into a delivery
+<ul>
+<li>Need to handle priorities</li>
+<li>Dispatch hub should tackle how many delivery resources are
+available</li>
+<li>Can an order fit in one delivery?</li>
+<li>Do we need a small or bif vechcle for this delivery?</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="service-data-adaptation-protocol-sdap"
+class="slide section level2">
+<h1>Service Data Adaptation Protocol (SDAP)</h1>
+<div
+style="display: flex; align-items: start; gap: 2em; margin-top: 0;">
+<div style="flex: 1; margin: 0; padding: 0;">
+<p><img src="images/ip-qos-flow.jpeg"
+       alt="End-to-end 5G architecture: UE — RAN — Core — Internet"
+       style="max-width: 60%; height: auto;"></p>
+<ul>
+<li><strong>Maps QoS flows to Data Radio Bearers</strong> [3GPP TS
+37.324]</li>
+<li>Each IP flow gets a Qos Flow Identification (QFI) — defines
+treatment</li>
+<li>SDAP groups similar QFI flows into a <strong>DRB</strong></li>
+<li>Marks QFI in UL and DL packets</li>
+<li>Multiple QoS flows can share one DRB if they need similar
+treatment.</li>
+<li>One SDAP entity per PDU session</li>
+</ul>
+</div>
+<div style="flex: 1;">
+<p><img src="images/sdap.jpeg"
+       style="max-width: 80%; height: auto;"></p>
+</div>
+</div>
+</div>
+<div id="analogy" class="slide section level2">
+<h1>Analogy</h1>
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
+<p><img src="images/analogy.png" style="max-width: 85%; height: auto;"></p>
+</div>
+<div style="flex: 1;">
+<ul>
+<li>Quality of service – Item with deliver tier (Fresh 🥬, Priority
+customer)<br />
+</li>
+<li>SDAP DRB grouping – Group sharing same tier (🍎, 🥭, 🥛 =&gt; Fresh
+)</li>
+<li>🧹 Normal items — Whenever resources are available (best
+effort)</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="packet-data-convergence-protocol-pdcp"
+class="slide section level2">
+<h1>Packet Data Convergence Protocol (PDCP)</h1>
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
+<p><img src="images/pdcp.jpeg" style="max-width: 85%; height: auto;"></p>
+</div>
+<div style="flex: 1;">
+<ul>
+<li><strong>Security and reliability</strong> [3GPP TS 38.323]</li>
+<li>Ciphering — encrypts data (keys from Day 1 authentication!)</li>
+<li>Integrity protection — detects tampering</li>
+<li>Sequence numbering — every PDCP packet is numbered</li>
+<li>Duplicate discarding</li>
+<li>In-order delivery during handover</li>
+<li>Header compression (ROHC)</li>
+<li>One PDCP entity per DRB</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="radio-link-contro-rlc" class="slide section level2">
+<h1>Radio link contro (RLC)</h1>
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
+<p><img src="images/rlc.jpeg" style="max-width: 85%; height: auto;"></p>
+</div>
+<div style="flex: 1;">
+<ul>
+<li><strong>Segmentation and reliable delivery</strong> [3GPP TS
+38.322]</li>
+<li>Segmentation — split large RLC packets to small ones that can be
+transported by lower layers</li>
+<li>Reassembly at receiver</li>
+<li>Sequence numbering</li>
+<li><strong>ARQ</strong> — retransmit lost segments (AM mode)</li>
+<li>One RLC entity per DRB</li>
+<li>RLC channel ↔︎ Logical channel </small></li>
+</ul>
+<table>
+<colgroup>
+<col width="23%" />
+<col width="38%" />
+<col width="38%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Mode</th>
+<th>Behavior</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>AM</strong> (Acknowledged)</td>
+<td>Numbered, confirmed, retransmitted</td>
+<td>Web, file download</td>
+</tr>
+<tr class="even">
+<td><strong>UM</strong> (Unacknowledged)</td>
+<td>Numbered, no retransmission</td>
+<td>Voice, video</td>
+</tr>
+<tr class="odd">
+<td><strong>TM</strong> (Transparent)</td>
+<td>Pass-through</td>
+<td>Broadcast, paging</td>
+</tr>
+</tbody>
+</table>
+<p></small></p>
+</div>
+</div>
+</div>
+<div id="medium-access-control-mac" class="slide section level2">
+<h1>Medium Access Control (MAC)</h1>
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
+<p><img src="images/mac.jpeg" style="max-width: 85%; height: auto;"></p>
+</div>
+<div style="flex: 1;">
+<ul>
+<li>Medium Access Control [3GPP TS 38.321]</li>
+<li>Multiplexing — logical channels → Transport Block</li>
+<li>Multiplexing of transport channels and forming the Transport Block
+(TB)</li>
+<li>Scheduling — which UE, how many resoursess, at which rate?</li>
+<li>Error correction at TB level through HARQ</li>
+<li>Maintaining UE synchronization</li>
+<li>Adaptive modulation (mcs), power control</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="analogy-1" class="slide section level2">
+<h1>Analogy</h1>
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
+<p><img src="images/analogy.png" style="max-width: 85%; height: auto;"></p>
+</div>
+<div style="flex: 1;">
+<ul>
+<li>Construct a delivery parcel per user
+<ul>
+<li><strong>Parcel 1:</strong> 🥬 Fresh + 💻 Prime → 🚛 truck</li>
+<li><strong>Parcel 2:</strong> 🧹 Normal → 🏍️ bike (later)</li>
+</ul></li>
+<li>Assign a vehicle and route
+<ul>
+<li>Good road → 🚛 truck (big parcel)</li>
+<li>Congested → 🏍️ bike (small parcel)</li>
+</ul></li>
+<li>One order may need multiple parcels across multiple delivery
+slots</li>
+<li>Dispatch algorithm based on
+<ul>
+<li>Number of orders and Order sizes</li>
+<li>Traffic conditions and road reports</li>
+<li>Delivery person availability</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="phy-physical-layer" class="slide section level2">
+<h1>PHY — Physical Layer</h1>
+<div style="display: flex; align-items: start; gap: 2em;">
+<div style="flex: 1;">
+<table>
+<thead>
+<tr class="header">
+<th>Channel</th>
+<th>Direction</th>
+<th>What it carries</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>PDSCH</strong></td>
+<td>Downlink</td>
+<td>User data + system info</td>
+</tr>
+<tr class="even">
+<td><strong>PUSCH</strong></td>
+<td>Uplink</td>
+<td>User data + control info</td>
+</tr>
+<tr class="odd">
+<td><strong>PDCCH</strong></td>
+<td>Downlink</td>
+<td>Scheduling decisions (DCI)</td>
+</tr>
+<tr class="even">
+<td><strong>PUCCH</strong></td>
+<td>Uplink</td>
+<td>CQI, HARQ ACK/NACK</td>
+</tr>
+<tr class="odd">
+<td><strong>PRACH</strong></td>
+<td>Uplink</td>
+<td>Random access preamble</td>
+</tr>
+<tr class="even">
+<td><strong>PBCH</strong></td>
+<td>Downlink</td>
+<td>Master Information Block</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div style="flex: 1;">
+<p>Channels are mapped on</p>
+<ul>
+<li><strong>Resource Grid:</strong> frequency (RBs) × time (slots)</li>
+<li><strong>OFDM</strong> — data across many subcarriers</li>
+<li><strong>Modulation</strong> — QPSK, 16QAM, 64QAM, 256QAM</li>
+<li><strong>Channel coding</strong> — LDPC (data), Polar (control)</li>
+<li><strong>MIMO</strong> — multiple antennas</li>
+<li><strong>Channel estimation</strong> — constant measurement</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="oai-code-pointers" class="slide section level2">
+<h1>OAI Code Pointers</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>OAI Source Path</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>SDAP</strong></td>
+<td><code>openair2/SDAP/nr_sdap/</code></td>
+</tr>
+<tr class="even">
+<td><strong>PDCP</strong></td>
+<td><code>openair2/LAYER2/nr_pdcp/</code></td>
+</tr>
+<tr class="odd">
+<td><strong>RLC</strong></td>
+<td><code>openair2/LAYER2/nr_rlc/</code></td>
+</tr>
+<tr class="even">
+<td><strong>MAC</strong></td>
+<td><code>openair2/LAYER2/NR_MAC_gNB/gNB_scheduler.c</code></td>
+</tr>
+<tr class="odd">
+<td><strong>PHY RX &amp; TX</strong></td>
+<td><code>openair1/SCHED_NR/phy_procedures_nr_gNB.c</code></td>
+</tr>
+</tbody>
+</table>
+<!-- ============================================================ -->
+<!-- SESSION 3: RAN HANDS-ON                                      -->
+<!-- ============================================================ -->
+</div>
+<div id="ran-hands-on" class="slide section level2 section-divider">
+<h1 class="section-divider">RAN Hands-on</h1>
+</div>
+<div id="oai-scope-see-your-signal-live" class="slide section level2">
+<h1>OAI Scope — See Your Signal Live</h1>
+<table>
+<colgroup>
+<col width="19%" />
+<col width="41%" />
+<col width="38%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tool</th>
+<th>How to build</th>
+<th>How to use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>nrscope</strong></td>
+<td><code>./build_oai --build-lib nrscope --ninja</code></td>
+<td>Run with <code>-d</code> flag</td>
+</tr>
+</tbody>
+</table>
+<p>❗Note: If you get the following error while compiling scope</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">CMake</span> Error at openair1/PHY/TOOLS/CMakeLists.txt:38 <span class="er">(</span><span class="ex">message</span><span class="kw">)</span><span class="bu">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="ex">required</span> library forms not found for building scopes</span></code></pre></div>
+<p>Install the required package</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">sudo</span> apt-get install libforms-dev</span></code></pre></div>
+<p>What you can see:</p>
+<ul>
+<li>Constellation diagrams (PDSCH, PUSCH, PBCH)</li>
+<li>Channel frequency response</li>
+<li>Time domain signal energy</li>
+<li>LLR graphs</li>
+</ul>
+</div>
+<div id="launch-with-scope" class="slide section level2 action">
+<h1 class="action">Launch with Scope</h1>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build</span></code></pre></div>
+<p>gNB with scope</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">sudo</span> ./nr-softmodem <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf <span class="at">--gNBs.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.min_rxtxtime</span> 6 <span class="at">--rfsim</span> <span class="at">--rfsimulator.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.serveraddr</span> server <span class="at">-d</span></span></code></pre></div>
+<p>UE with scope</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">sudo</span> ./nr-uesoftmodem <span class="at">-r</span> 106 <span class="at">--numerology</span> 1 <span class="at">--band</span> 78 <span class="at">-C</span> 3619200000 <span class="at">--ssb</span> 516 <span class="at">--rfsim</span> <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/nrue.conf <span class="at">-d</span></span></code></pre></div>
+<p>❗ Remote VM? Use <strong>X11 forwarding</strong>:
+<code>ssh -X user@host</code></p>
+</div>
+<div id="gnb-scope" class="slide section level2 observe">
+<h1 class="observe">gNB Scope</h1>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img src="images/gNB_scope.png" /></p>
+</div><div class="column" style="width:50%;">
+<ul>
+<li><strong>PUSCH constellation</strong> — tight clusters = good
+signal</li>
+<li><strong>Channel frequency response</strong> — across
+subcarriers</li>
+<li><strong>Time domain</strong> — energy over time</li>
+</ul>
+<p><strong>Try:</strong> Run <code>iperf3</code> uplink while
+watching!</p>
+</div>
+</div>
+</div>
+<div id="ue-scope" class="slide section level2 observe">
+<h1 class="observe">UE Scope</h1>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img src="images/ue_scope.png" /></p>
+</div><div class="column" style="width:50%;">
+<ul>
+<li><strong>PDSCH constellation</strong> — QPSK=4pts, 16QAM=16,
+64QAM=64</li>
+<li><strong>PBCH constellation</strong> — always QPSK</li>
+<li><strong>Channel estimates</strong> — frequency domain</li>
+</ul>
+<p><strong>Try:</strong> Run <code>iperf3</code> downlink — watch
+constellation get denser!</p>
+</div>
+</div>
+</div>
+<div id="channel-model-with-rfsim" class="slide section level2 action">
+<h1 class="action">Channel Model with RFsim</h1>
+<p>Folder:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build</span></code></pre></div>
+<p>Add to gNB and UE config:</p>
+<pre><code>@include &quot;channelmod_rfsimu.conf&quot;</code></pre>
+<p>Launch UE with channel model:</p>
+<p>gNB:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">sudo</span> ./nr-softmodem <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf <span class="at">--gNBs.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.min_rxtxtime</span> 6 <span class="at">--rfsim</span> <span class="at">--rfsimulator.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.serveraddr</span> server <span class="at">--rfsimulator.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.options</span> chanmod <span class="at">--rfsimulator.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.modelname</span> AWGN <span class="at">-d</span></span></code></pre></div>
+<p>nrUE:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">sudo</span> ./nr-uesoftmodem <span class="at">-r</span> 106 <span class="at">--numerology</span> 1 <span class="at">--band</span> 78 <span class="at">-C</span> 3619200000 <span class="at">--ssb</span> 516 <span class="at">--rfsim</span> <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/nrue.conf <span class="at">-d</span> <span class="at">--rfsimulator.options</span> chanmod <span class="at">--rfsimulator.modelname</span> AWGN</span></code></pre></div>
+<p><strong>Watch:</strong> Constellations spread out with noise and
+fading.</p>
+</div>
+<div id="tdd-pattern" class="slide section level2 action">
+<h1 class="action">TDD Pattern</h1>
+<p><strong>5ms pattern (default):</strong></p>
+<pre><code>dl_UL_TransmissionPeriodicity  = 6;   # 5ms
+nrofDownlinkSlots              = 7;
+nrofDownlinkSymbols            = 6;
+nrofUplinkSlots                = 2;
+nrofUplinkSymbols              = 4;</code></pre>
+<p><strong>2.5ms pattern:</strong></p>
+<pre><code>dl_UL_TransmissionPeriodicity  = 5;   # 2.5ms
+nrofDownlinkSlots              = 2;
+nrofDownlinkSymbols            = 6;
+nrofUplinkSlots                = 2;
+nrofUplinkSymbols              = 4;</code></pre>
+<p><strong>Exercise:</strong> Run iperf DL+UL with both. Which gives
+better UL throughput? Why?</p>
+</div>
+<div id="bandwidth" class="slide section level2 action">
+<h1 class="action">Bandwidth</h1>
+<p>Folder:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build</span></code></pre></div>
+<p><strong>20 MHz (51 PRBs):</strong></p>
+<p>gNB:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">sudo</span> ./nr-softmodem <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.51PRB.usrpb210.conf <span class="at">--gNBs.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.min_rxtxtime</span> 6 <span class="at">--rfsim</span> <span class="at">--rfsimulator.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.serveraddr</span> server</span></code></pre></div>
+<p>nrUE:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">sudo</span> ./nr-uesoftmodem <span class="at">-r</span> 51 <span class="at">--numerology</span> 1 <span class="at">--band</span> 78 <span class="at">-C</span> 3609300000 <span class="at">--ssb</span> 228 <span class="at">--rfsim</span> <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/nrue.conf <span class="at">-d</span> </span></code></pre></div>
+<p><strong>Exercise:</strong> Compare throughput at 20MHz vs 40MHz.</p>
+</div>
+<div id="multiple-ues" class="slide section level2 action">
+<h1 class="action">Multiple UEs</h1>
+<p>Folder:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build</span></code></pre></div>
+<p>Make <code>multi-ue.sh</code> as executable</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">chmod</span> +x ~/iittp-oai-hands-on/ran/multi-ue.sh</span></code></pre></div>
+<p>gNB</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">sudo</span> ./nr-softmodem <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf <span class="at">--gNBs.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.min_rxtxtime</span> 6 <span class="at">--rfsim</span> <span class="at">--rfsimulator.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.serveraddr</span> server</span></code></pre></div>
+<p>UE1</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">sudo</span> ~/iittp-oai-hands-on/ran/multi-ue.sh <span class="at">-c1</span> <span class="at">-e</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">sudo</span> ./nr-uesoftmodem <span class="at">-r</span> 106 <span class="at">--numerology</span> 1 <span class="at">--band</span> 78 <span class="at">-C</span> 3619200000 <span class="at">--ssb</span> 516 <span class="at">--rfsim</span> <span class="at">-O</span> /home/oai/iittp-oai-hands-on/ran/conf/ue1.conf <span class="at">--rfsimulator.serveraddr</span> 10.201.1.100</span></code></pre></div>
+<p>UE2</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">sudo</span> ~/iittp-oai-hands-on/ran/multi-ue.sh <span class="at">-c2</span> <span class="at">-e</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="fu">sudo</span> ./nr-uesoftmodem <span class="at">-r</span> 106 <span class="at">--numerology</span> 1 <span class="at">--band</span> 78 <span class="at">-C</span> 3619200000 <span class="at">--ssb</span> 516 <span class="at">--rfsim</span> <span class="at">-O</span> /home/oai/iittp-oai-hands-on/ran/conf/ue2.conf <span class="at">--rfsimulator.serveraddr</span> 10.202.1.100</span></code></pre></div>
+</div>
+<div id="multiple-ues-testing" class="slide section level2 action">
+<h1 class="action">Multiple UEs — Testing</h1>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># UE1</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">sudo</span> ip netns exec ue1 bash</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-I</span> oaitun_ue1 192.168.70.135</span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="co"># UE2</span></span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="fu">sudo</span> ip netns exec ue2 bash</span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-I</span> oaitun_ue1 192.168.70.135</span></code></pre></div>
+<p><strong>Exercise:</strong> Run iperf from both UEs simultaneously.
+Watch the scheduler sharing resources.</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Cleanup</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">sudo</span> ~/iittp-oai-hands-on/ran/multi-ue.sh <span class="at">-d1</span> <span class="at">-d2</span></span></code></pre></div>
+<!-- ============================================================ -->
+<!-- WRAP-UP                                                      -->
+<!-- ============================================================ -->
+</div>
+<div id="workshop-summary" class="slide section level2 section-divider">
+<h1 class="section-divider">Workshop Summary</h1>
+</div>
+<div id="what-we-covered" class="slide section level2">
+<h1>What We Covered</h1>
+<p><strong>Day 1 — Core Network &amp; Control Plane</strong></p>
+<ul>
+<li>5G Core architecture: SBA, Network Functions</li>
+<li>Deployed OAI CN + gNB + UE in rfsim</li>
+<li>NAS registration and 5G-AKA authentication</li>
+<li>Wireshark analysis</li>
+</ul>
+<p><strong>Day 2 — Data Plane &amp; RAN</strong></p>
+<ul>
+<li>PDU session establishment</li>
+<li>GTP-U tunneling</li>
+<li>RAN protocol stack: SDAP → PDCP → RLC → MAC → PHY</li>
+<li>OAI scope visualization</li>
+<li>Experiments: TDD, bandwidth, multi-UE</li>
+</ul>
+</div>
+<div id="want-to-explore-more" class="slide section level2">
+<h1>Want to explore more?</h1>
+<p><strong>Resources:</strong></p>
+<ul>
+<li>OAI RAN:
+<code>https://gitlab.eurecom.fr/oai/openairinterface5g</code></li>
+<li>OAI CN5G:
+<code>https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g</code></li>
+<li>3GPP Specs: TS 23.501, TS 38.300, TS 38.321</li>
+</ul>
+</div>
+<div id="thank-you" class="slide section level2">
+<h1>Thank You!</h1>
+<p><strong>Instructors:</strong> Rajeev Gangula, Rakesh Mundlamuri,
+Venkatareddy Akumalla, Chandra R. Murthy, Subash Mondal</p>
+<p><strong>Workshop materials:</strong>
+<code>https://github.com/RajeevGa/iittp-oai-hands-on</code></p>
+<p><strong>Feedback is welcome!</strong></p>
 </div>
 </body>
 </html>

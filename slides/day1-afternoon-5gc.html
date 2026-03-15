@@ -11,13 +11,24 @@
   <style type="text/css">
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
     div.sourceCode { margin: 1em 0; }
     pre.sourceCode { margin: 0; }
@@ -52,7 +63,7 @@
     code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
     code span.at { color: #7d9029; } /* Attribute */
     code span.bn { color: #40a070; } /* BaseN */
-    code span.bu { } /* BuiltIn */
+    code span.bu { color: #008000; } /* BuiltIn */
     code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
     code span.ch { color: #4070a0; } /* Char */
     code span.cn { color: #880000; } /* Constant */
@@ -65,7 +76,7 @@
     code span.ex { } /* Extension */
     code span.fl { color: #40a070; } /* Float */
     code span.fu { color: #06287e; } /* Function */
-    code span.im { } /* Import */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
     code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
     code span.kw { color: #007020; font-weight: bold; } /* Keyword */
     code span.op { color: #666666; } /* Operator */
@@ -124,7 +135,7 @@
   <p class="author">
 OAI 5G NR Workshop — IIT Tirupati
   </p>
-  <p class="date">March 13, 2026 | Afternoon Session</p>
+  <p class="date">March 14, 2026 | Afternoon Session</p>
 </div>
 <div class="slide section level2">
 
@@ -135,6 +146,10 @@ OAI 5G NR Workshop — IIT Tirupati
 <div id="afternoon-session-agenda" class="slide section level2">
 <h1>Afternoon Session — Agenda</h1>
 <table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th>Block</th>
@@ -171,20 +186,24 @@ OAI 5G NR Workshop — IIT Tirupati
 <p><strong>Goal:</strong> By the end of this session,</p>
 <ul>
 <li>You will have a working end-to-end 5G network</li>
-<li>Understand the initial protocol messages exchanged from UE power-on to internet access</li>
+<li>Understand the initial protocol messages exchanged from UE power-on
+to internet access</li>
 </ul>
 </div>
 <div id="what-you-need" class="slide section level2">
 <h1>What You Need</h1>
 <ul>
-<li>Laptop with <strong>Ubuntu 22.04 or 24.04</strong> (native or VM), Internet access</li>
+<li>Laptop with <strong>Ubuntu 22.04 or 24.04</strong> (native or VM),
+Internet access</li>
 </ul>
 <p>If you haven’t set these up yet, lets setup.</p>
 <h3 id="git">1. Git</h3>
 <pre><code>sudo apt-get update
 sudo apt-get install git</code></pre>
 <h3 id="wireshark">2. Wireshark</h3>
-<p>❗ Make sure to select <code>yes</code> when the Wireshark installation asks you whether non-superusers should be able to capture packets. Otherwise, you will have to run in sudo mode.</p>
+<p>❗ Make sure to select <code>yes</code> when the Wireshark
+installation asks you whether non-superusers should be able to capture
+packets. Otherwise, you will have to run in sudo mode.</p>
 <pre><code>sudo add-apt-repository ppa:wireshark-dev/stable
 sudo apt update
 sudo apt install -y git net-tools wireshark</code></pre>
@@ -199,20 +218,32 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository &quot;deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable&quot;
 sudo apt update
 sudo apt install -y docker docker-ce</code></pre>
-<p>❗ Add your username to the docker group, otherwise you will have to run in sudo mode.</p>
+<p>❗ Add your username to the docker group, otherwise you will have to
+run in sudo mode.</p>
 <pre><code>sudo usermod -a -G docker $(whoami)</code></pre>
 <p>❗ Now, close the terminal tab and re-open it.</p>
+<ul>
+<li><p>If you dont have a docker account, create a docker account in <a
+href="https://www.docker.com/">docker signup</a></p></li>
+<li><p>Login to docker</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>   <span class="ex">docker</span> login <span class="at">-u</span> <span class="op">&lt;</span>username<span class="op">&gt;</span></span></code></pre></div></li>
+<li><p>Enter your password</p></li>
+</ul>
 <!-- ============================================================ -->
 <!-- ACTION: Clone repositories                                    -->
 <!-- ============================================================ -->
 </div>
-<div id="clone-the-workshop-repository" class="slide section level2 action">
+<div id="clone-the-workshop-repository"
+class="slide section level2 action">
 <h1 class="action">Clone the Workshop Repository</h1>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="co"># Clone the workshop repo</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a><span class="bu">cd</span> ~</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a><span class="fu">git</span> clone https://github.com/RajeevGa/iittp-oai-hands-on.git</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a><span class="bu">cd</span> iittp-oai-hands-on </span></code></pre></div>
-<p>This repo contains configs, scripts, pcap traces, and these slides.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Clone the workshop repo</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="bu">cd</span> ~</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/RajeevGa/iittp-oai-hands-on.git</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="bu">cd</span> iittp-oai-hands-on </span></code></pre></div>
+<p>This repo contains configs, scripts, pcap traces, and these
+slides.</p>
 </div>
 <div id="g-architecture" class="slide section level2">
 <h1>5G Architecture</h1>
@@ -230,7 +261,8 @@ sudo apt install -y docker docker-ce</code></pre>
 <ul>
 <li><strong>UE</strong> — your phone or device</li>
 <li><strong>gNB</strong> — the base station</li>
-<li><strong>5G Core</strong> — the brain that manages connections, sessions, and data routing</li>
+<li><strong>5G Core</strong> — the brain that manages connections,
+sessions, and data routing</li>
 </ul>
 <!-- ============================================================ -->
 <!-- SECTION 1: 5G CORE ARCHITECTURE                              -->
@@ -238,16 +270,19 @@ sudo apt install -y docker docker-ce</code></pre>
 </div>
 <div id="g-core-network-architecture" class="slide section level2">
 <h1>5G Core Network Architecture</h1>
-<div style="display: flex; align-items: start; gap: 2em; margin-top: 0;">
+<div
+style="display: flex; align-items: start; gap: 2em; margin-top: 0;">
 <div style="flex: 1; margin: 0; padding: 0;">
 <ul>
 <li><strong>5G core design choices</strong>
 <ul>
-<li>Dividing monolithic element into smaller Network Functions (NFs)</li>
-<li>Service-based architecture is based on a set of NFs</li>
+<li>Dividing monolithic element into smaller Network Functions
+(NFs)</li>
 <li>Virtualization</li>
+<li>Service-based architecture (SBA)</li>
 <li>NFs communicate over a common bus via APIs.</li>
-<li>Each NF registers with the NRF and can discover/consume services from other NFs dynamically</li>
+<li>Each NF registers with the NRF and can discover/consume services
+from other NFs dynamically</li>
 </ul></li>
 </ul>
 <p><small style="font-size: 0.55em; color: #666; line-height: 1.4;"></p>
@@ -311,294 +346,387 @@ sudo apt install -y docker docker-ce</code></pre>
 </div>
 <div style="flex: 1;">
 <p><img src="images/5g-core-arch.png"
-       style="max-width: 80%; height: auto;"></p>
-<p><img src="images/5gc-sba.png"
-       alt="End-to-end 5G architecture: UE — RAN — Core — Internet"
-       style="max-width: 80%; height: auto;"></p>
+       style="max-width: 100%; height: auto;"></p>
 </div>
 </div>
 </div>
 <div id="g-protocol-stack" class="slide section level2">
 <h1>5G Protocol Stack</h1>
-<div style="display: flex; align-items: start; gap: 2em; margin-top: 0;">
+<div
+style="display: flex; align-items: start; gap: 2em; margin-top: 0;">
 <div style="flex: 1; margin: 0; padding: 0;">
 <ul>
 <li><strong>Control Plane</strong>
 <ul>
-<li><strong>Non-Access Stratum (NAS)</strong>: Functional layer to exchange control plane messages between UE and CN</li>
-<li><strong>Signaling</strong> - Who is the user? Is she/he/it a valid one? where should the user data should go? How to handle Roaming?</li>
+<li><strong>Non-Access Stratum (NAS)</strong>: Functional layer to
+exchange control plane messages between UE and CN</li>
+<li><strong>Signaling</strong> - Who is the user? Is she/he/it a valid
+one? where should the user data should go? How to handle Roaming?</li>
 <li>Establishment and management of communication sessions (NAS-SM)</li>
 <li>Mobility management (NAS-MM)</li>
-<li>Example NAS messages: UE attach and registration, authentication etc.</li>
-<li><strong>AMF</strong> handles control signaling with the UE and RAN</li>
+<li>Example NAS messages: UE attach and registration, authentication
+etc.</li>
+<li><strong>AMF</strong> handles control signaling with the UE and
+RAN</li>
 </ul></li>
 <li><strong>User Plane</strong>
 <ul>
 <li>Access Stratum (AS)</li>
 <li><strong>SMF</strong> programs the <strong>UPF</strong></li>
-<li><strong>UPF</strong> just forwards packets — it’s told what to do by the SMF</li>
-<li>Actual data packets Ex: YouTube video, Arattai</li>
+<li><strong>UPF</strong> just forwards packets — it’s told what to do by
+the SMF</li>
+<li>Actual data packets Ex: YouTube video</li>
 </ul></li>
 </ul>
 </div>
 <div style="flex: 1;">
-<p><img src="images/proto-nas.jpeg"
-       style="max-width: 80%; height: auto;"></p>
-<img src="images/proto-as.jpeg"
-       alt="End-to-end 5G architecture: UE — RAN — Core — Internet"
-       style="max-width: 80%; height: auto;">
+<div
+style="display: flex; flex-direction: column; align-items: center;">
+<img src="images/proto-nas.jpeg" style="max-width: 80%; height: auto;">
 <p class="caption">
-</small> End-to-end 5G system — UE connects through RAN to Core Network and onward to the Internet </small>
+<small>Control Plane</small>
 </p>
-<p></small> - <strong>NR-Uu:</strong> Radio interface (UE ↔︎ gNB) — RRC carries NAS messages - <strong>N2:</strong> gNB ↔︎ AMF — NGAP over SCTP - <strong>N11:</strong> AMF ↔︎ SMF — HTTP/2 (Service-Based Interface)</p>
-<p></small></p>
+<img src="images/proto-as.jpeg" style="max-width: 85%; height: auto;">
+<p class="caption">
+<small>User Plane</small>
+</p>
+</div>
+<p><small> <strong>NR-Uu:</strong> Radio interface (UE ↔︎ gNB)
+<strong>N2:</strong> gNB ↔︎ AMF — NGAP over SCTP <strong>N11:</strong>
+AMF ↔︎ SMF — HTTP/2 (Service-Based Interface) </small></p>
 </div>
 </div>
 </div>
-<div id="installing-oai-5g-core" class="slide section level2 action">
-<h1 class="action">Installing OAI 5G Core</h1>
+<div id="oai-5g-core" class="slide section level2">
+<h1>OAI 5G Core</h1>
 <ul>
-<li><strong>Main repository</strong> <a href="https://gitlab.eurecom.fr/oai/cn5g" class="uri">https://gitlab.eurecom.fr/oai/cn5g</a></li>
-<li><strong>Each NF has its own repository</strong>. Example: <a href="https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf" class="uri">https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf</a>
+<li>Main repository <a href="https://gitlab.eurecom.fr/oai/cn5g"
+class="uri">https://gitlab.eurecom.fr/oai/cn5g</a></li>
+<li>Each NF has its own repository. Example: <a
+href="https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf"
+class="uri">https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf</a>
 <ul>
 <li><em>oai-cn5g-amf</em> is meant for AMF NF</li>
 <li>All OAI 5G CN NFs are dockerized</li>
 </ul></li>
-<li>Go the core network folder in the workshop directory that you have cloned</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="bu">cd</span> ~/iittp-oai-hands-on/cn</span></code></pre></div>
-<p>If you dont have a docker account, create a docker account in <a href="https://www.docker.com/">docker signup</a></p>
-<p>Login to docker</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="ex">docker</span> login -u <span class="op">&lt;</span>username<span class="op">&gt;</span></span></code></pre></div>
-<p>Enter your password</p>
+</div>
+<div id="clone-the-oai-repository" class="slide section level2 action">
+<h1 class="action">Clone the OAI repository</h1>
+<ul>
+<li><p>Open a new terminal and clone the ran repository</p>
+<ul>
+<li>If you have already cloned it, just checkout the tag: 2026.w10</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>    <span class="bu">cd</span> ~/iittp-oai-hands-on </span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>    <span class="fu">git</span> clone https://gitlab.eurecom.fr/oai/openairinterface5g.git</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>    <span class="bu">cd</span> openairinterface5g</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    <span class="fu">git</span> checkout 2026.w10</span></code></pre></div></li>
+<li><p>The docker compose file and configuration files for
+<code>OAI 5G Core</code> is present in the following directory</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>    <span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/doc/tutorial_resources/oai-cn5g</span></code></pre></div>
+<hr /></li>
+</ul>
 </div>
 <div id="deploying-oai-5g-core" class="slide section level2 action">
 <h1 class="action">Deploying OAI 5G core</h1>
 <ul>
-<li>Now, pull the 5G core docker images</li>
-</ul>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="ex">docker</span> compose pull</span></code></pre></div>
-<ul>
-<li>start core network</li>
-</ul>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a><span class="ex">docker</span> compose -f docker-compose.yaml up -d</span></code></pre></div>
-<p>watch status of the core network</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="ex">watch</span> docker compose -f docker-compose.yaml ps -a</span></code></pre></div>
-<p>All the docker containers should be <code>healthy</code></p>
-<ul>
-<li>Important files: MySQL database stores the subscriber data, yaml file is contains details of all NFs</li>
-<li>Some useful commands
+<li><p>Now, pull the 5G core docker images</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a> <span class="ex">docker</span> compose pull</span></code></pre></div></li>
+<li><p>start core network</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a> <span class="ex">docker</span> compose <span class="at">-f</span> docker-compose.yaml up <span class="at">-d</span></span></code></pre></div></li>
+<li><p>watch status of the core network</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a> <span class="ex">watch</span> docker compose <span class="at">-f</span> docker-compose.yaml ps <span class="at">-a</span></span></code></pre></div>
+<p>All the docker containers should be <code>healthy</code></p></li>
+<li><p>Important files: MySQL database stores the subscriber data, yaml
+file is contains details of all NFs</p></li>
+<li><p>Some useful commands</p>
 <ul>
 <li>docker ps -a</li>
-<li>docker logs oai-amf -f</li>
-<li>docker logs oai-smf -f</li>
+<li>docker logs <container name> -f</li>
 </ul></li>
 </ul>
 </div>
-<div id="oai-deployment-modes" class="slide section level2">
-<h1>OAI Deployment Modes</h1>
-<p align="center">
-<img style="display: block; margin: auto;" src="images/oai-mode-ota-cots.jpg" alt="Over-the-Air with COTS UE" width="250" style="display:inline-block; margin:10px;"/> <img style="display: block; margin: auto;" src="images/oai-mode-ota-oaiue.jpg" alt="Over-the-Air with OAI nrUE" width="250" style="display:inline-block; margin:10px;"/> <img style="display: block; margin: auto;" src="images/oai-mode-rfsim.jpg" alt="RFsimulator" width="250" style="display:inline-block; margin:10px;"/>
-</p>
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th>OTA + COTS UE</th>
-<th>OTA + OAI nrUE</th>
-<th>RFsimulator</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>RF Hardware</strong></td>
-<td>SDR / Radio Unit</td>
-<td>SDR on both sides</td>
-<td>None</td>
-</tr>
-<tr class="even">
-<td><strong>UE</strong></td>
-<td>Commercial phone</td>
-<td>OAI software UE</td>
-<td>OAI software UE</td>
-</tr>
-<tr class="odd">
-<td><strong>Radio Channel</strong></td>
-<td>Real</td>
-<td>Real</td>
-<td>Simulated (TCP)</td>
-</tr>
-<tr class="even">
-<td><strong>Protocols</strong></td>
-<td>Real</td>
-<td>Real</td>
-<td>Real</td>
-</tr>
-<tr class="odd">
-<td><strong>Use case</strong></td>
-<td>Field trials, demos</td>
-<td>Research, testing</td>
-<td>Learning, development</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="why-rfsimulator" class="slide section level2">
-<h1>Why RFsimulator?</h1>
-<p align="center">
-<img style="display: block; margin: auto;" src="../images/oai-deployment-modes.jpg" alt="OAI Deployment Modes" width="800"/>
-</p>
-<!-- If image not ready, uncomment this:
-<p align="center"><em>[Image: Three modes — OTA+COTS UE, OTA+OAI UE, RFsim]</em></p>
--->
-<p>RFsim is perfect for learning and protocol development because:</p>
+<div id="oai-operating-modes" class="slide section level2">
+<h1>OAI Operating Modes</h1>
+<div
+style="display: flex; align-items: start; gap: 1em; margin-top: 0;">
+<div style="flex: 1; margin: 0; padding: 0;">
 <ul>
-<li><strong>No hardware needed</strong> — runs on any laptop</li>
-<li><strong>Reproducible</strong> — no RF interference or hardware quirks</li>
-<li><strong>All signaling is real</strong> — NAS, NGAP, PFCP, GTP-U messages are identical to a live network</li>
-<li><strong>Wireshark works</strong> — you can capture and analyze every protocol message</li>
-<li><strong>Fast iteration</strong> — change config, restart, test in seconds</li>
+<li>Over the air mode
+<ul>
+<li>Using commercial or OAI UE, and OAI gNB</li>
+<li>Real-time operation</li>
+<li>Can use Software Defined Radios (SDRs) or Radio Units (RUs) for RF
+frontend</li>
+</ul></li>
+<li>RFsimulator mode
+<ul>
+<li>No RF hardware and over the air transmissions</li>
+<li>Complete protocol stack (Its not a network simulator!)</li>
+<li>Can induce channel models between gNB and nrUE</li>
+<li>Learning, development and testing protocols</li>
+</ul></li>
 </ul>
-<p><strong>For this workshop:</strong> We use rfsim so everyone can participate with just a laptop.</p>
-<p><strong>In the lab:</strong> We will also show a live over-the-air demo with real SDR hardware!</p>
+<p><strong>For this workshop:</strong> We use rfsim so everyone can
+participate with just a laptop</p>
+<p><strong>In the lab:</strong> We will also show a live over-the-air
+demo with real SDR hardware!</p>
 </div>
-<div id="installing-oai-gnb-ue" class="slide section level2">
-<h1>Installing OAI gNB &amp; UE</h1>
-<p>Open a new terminal and clone the ran repository</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a><span class="fu">git</span> clone https://gitlab.eurecom.fr/oai/openairinterface5g.git</span></code></pre></div>
-<p>compile the gNB and nrUE</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a><span class="bu">cd</span> openairinterface5g/</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a><span class="fu">git</span> checkout 2024.w46</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a><span class="bu">source</span> oaienv</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true"></a><span class="bu">cd</span> cmake_targets/</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true"></a><span class="ex">./build_oai</span> -I  </span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true"></a><span class="ex">./build_oai</span> -w SIMU --gNB --nrUE --ninja</span></code></pre></div>
+<div
+style="display: flex; flex-direction: column; align-items: center;">
+<p><img src="images/oai-modes.png" style="max-width: 95%; height: auto;"></p>
+</div>
+</div>
+</div>
+<div id="installing-oai-gnb-ue" class="slide section level2 action">
+<h1 class="action">Installing OAI gNB &amp; UE</h1>
+<ul>
+<li>We have already deployed the core network</li>
+<li>Lets compile the gNB and nrUE (tag: 2026.w10)</li>
+<li>Will use the build script</li>
+</ul>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="bu">source</span> oaienv</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="bu">cd</span> cmake_targets/</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="ex">./build_oai</span> <span class="at">-I</span> <span class="co"># Only for first time build </span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="ex">./build_oai</span> <span class="at">-w</span> SIMU <span class="at">--gNB</span> <span class="at">--nrUE</span> <span class="at">--ninja</span></span></code></pre></div>
 </div>
 <div id="launch-gnb" class="slide section level2 action">
 <h1 class="action">Launch gNB</h1>
-<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a><span class="bu">cd</span> ~/openairinterface5g/cmake_targets/ran_build/build</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true"></a><span class="fu">sudo</span> -E ./nr-softmodem --rfsim <span class="kw">\</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true"></a>  <span class="ex">-O</span> ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">sudo</span> ./nr-softmodem <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf <span class="at">--gNBs.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.min_rxtxtime</span> 6 <span class="at">--rfsim</span> <span class="at">--rfsimulator.</span><span class="pp">[</span><span class="ss">0</span><span class="pp">]</span><span class="at">.serveraddr</span> server</span></code></pre></div>
 <p><strong>Watch for in the logs:</strong></p>
 <pre><code>[NGAP]   Send NGSetupRequest to AMF
+[NGAP]   3584 -&gt; 0000e000
+[NGAP]   Served GUAMIs for AMF OAI-AMF (assoc_id=23):
+[NGAP]    GUAMI:
+[NGAP]      PLMN: MCC=001, MNC=01
+[NGAP]      AMF Region ID: 1
+[NGAP]      AMF Set ID: 1
+[NGAP]      AMF Pointer: 1
+[NGAP]   Supported PLMN 0: MCC=001 MNC=01
+[NGAP]   Supported slice (PLMN 0): SST=0x01 SD=000
 [NGAP]   Received NGSetupResponse from AMF
-[GNB_APP]   [gNB 0] Received NGAP_REGISTER_GNB_CNF: associated AMF 1</code></pre>
+[UTIL]   threadCreate() for TASK_GTPV1_U: creating thread with affinity ffffffff, priority 50
+[GNB_APP] [gNB 0] Received NGAP_REGISTER_GNB_CNF: associated AMF 1</code></pre>
 <p>This means gNB has successfully connected to the 5G Core!</p>
 </div>
 <div id="launch-nrue" class="slide section level2 action">
 <h1 class="action">Launch nrUE</h1>
 <p>In another terminal:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a><span class="bu">cd</span> ~/openairinterface5g/cmake_targets/ran_build/build</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true"></a><span class="fu">sudo</span> -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 <span class="kw">\</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true"></a>  <span class="ex">-C</span> 3619200000 --rfsim --ssb 516 <span class="kw">\</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true"></a>  <span class="ex">-O</span> ~/iittp-oai-hands-on/ran/conf/ue.conf</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">sudo</span> ./nr-uesoftmodem <span class="at">-r</span> 106 <span class="at">--numerology</span> 1 <span class="at">--band</span> 78 <span class="at">-C</span> 3619200000 <span class="at">--ssb</span> 516 <span class="at">--rfsim</span> <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/nrue.conf</span></code></pre></div>
 <p><strong>Watch the logs for these milestones:</strong></p>
-<pre><code>[NR_RRC]   State = NR_RRC_CONNECTED
-[NAS]   [UE] Received REGISTRATION ACCEPT message
-[OIP]   Interface oaitun_ue1 successfully configured, IPv4 10.0.0.x</code></pre>
+<pre><code>[NR_RRC] State = NR_RRC_CONNECTED
+[NR_RRC] RRCReconfiguration includes Measurement Configuration
+[NR_RRC] Measurement gaps not yet supported!
+[NAS]    [UE 0] Received NAS_CONN_ESTABLI_CNF: errCode 1, length 98
+[NR_RRC] rrcReconfigurationComplete Encoded 10 bits (2 bytes)
+[NR_RRC]  Logical Channel UL-DCCH (SRB1), Generating RRCReconfigurationComplete (bytes 2)
+[NAS]    Received PDU Session Establishment Accept, UE IPv4: 10.0.0.2
+[OIP]    TUN Interface oaitun_ue1 successfully configured, IPv4 10.0.0.2, IPv6 (null)</code></pre>
 <p>🎉 <strong>Your UE is connected to the 5G network!</strong></p>
 </div>
-<div id="verify-end-to-end-connectivity" class="slide section level2 observe">
+<div id="verify-end-to-end-connectivity"
+class="slide section level2 observe">
 <h1 class="observe">Verify End-to-End Connectivity</h1>
 <p><strong>gNB logs — check for:</strong></p>
-<pre><code>[NR_MAC]   UE RNTI b010: Received Ack of Msg4. CBRA procedure succeeded!
-[NR_RRC]   Received RRCSetupComplete (RRC_CONNECTED reached)
-[NR_RRC]   Received Security Mode Complete
-[NR_RRC]   NGAP_PDUSESSION_SETUP_RESP: sending the message</code></pre>
+<pre><code>[NR_RRC] [UL] (cellID bc614e, UE ID 1 RNTI 70af) Received RRCReconfigurationComplete
+[NR_RRC] PDU Session Setup: ID=10, outgoing TEID=0x16461cbc, Addr=192.168.70.129
+[NR_RRC] NGAP_PDUSESSION_SETUP_RESP: sending the message
+[NGAP]   Encoded PDU Session Transfer (10): TEID=0x16461cbc, Addr=192.168.70.129</code></pre>
 <p><strong>nrUE — check interface is up:</strong></p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a><span class="ex">ifconfig</span> oaitun_ue1</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="ex">ifconfig</span> oaitun_ue1</span></code></pre></div>
 <p>You should see an IP address like <code>10.0.0.x</code></p>
 </div>
 <div id="ping-test" class="slide section level2 action">
 <h1 class="action">Ping Test</h1>
-<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true"></a><span class="co"># From UE to the external data network container</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true"></a><span class="fu">ping</span> -I oaitun_ue1 192.168.70.135</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true"></a><span class="co"># From the container to the UE (downlink)</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true"></a><span class="ex">docker</span> exec -it oai-ext-dn ping </span></code></pre></div>
-<p>The IP address <code>192.168.70.135</code> is the IP address of the <code>oai-ext-dn</code> container.</p>
+<p>In another terminal:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># From UE to the external data network container</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-I</span> oaitun_ue1 192.168.70.135</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="co"># From the container to the UE (downlink)</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a><span class="ex">docker</span> exec <span class="at">-it</span> oai-ext-dn ping <span class="op">&lt;</span>UE IP address<span class="op">&gt;</span></span></code></pre></div>
+<ul>
+<li>The IP address <code>192.168.70.135</code> is the IP address of the
+<code>oai-ext-dn</code> container.</li>
+<li>The <code>oai-ext-dn</code> container is mimicking the Internet
+here!</li>
+</ul>
 </div>
 <div id="iperf-test" class="slide section level2 action">
 <h1 class="action">iperf Test</h1>
 <p>Start iperf3 server inside the external data network container:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a><span class="ex">docker</span> exec -it oai-ext-dn bash</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true"></a><span class="ex">iperf3</span> -s</span></code></pre></div>
-<p>On the host in a new terminal, run iperf3 client bound to the UE IP:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="co"># Downlink test</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true"></a><span class="ex">iperf3</span> -B  -c 192.168.70.135 -u -b 50M -R</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true"></a></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true"></a><span class="co"># Uplink test</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true"></a><span class="ex">iperf3</span> -B  -c 192.168.70.135 -u -b 20M</span></code></pre></div>
-<p>🎉 <strong>Congratulations — you have a working end-to-end 5G network!</strong></p>
-<p>Now let’s understand what just happened under the hood…</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="ex">docker</span> exec <span class="at">-it</span> oai-ext-dn bash</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="ex">iperf3</span> <span class="at">-s</span></span></code></pre></div>
+<p>On the host in a new terminal, run iperf3 client bound to the UE
+IP:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># Downlink test</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="ex">iperf3</span> <span class="at">-B</span> <span class="op">&lt;</span>UE IP ADDRESS<span class="op">&gt;</span> -c 192.168.70.135 <span class="at">-u</span> <span class="at">-b</span> 50M <span class="at">-R</span></span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="co"># Uplink test</span></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="ex">iperf3</span> <span class="at">-B</span> <span class="op">&lt;</span>UE IP ADDRESS<span class="op">&gt;</span> -c 192.168.70.135 <span class="at">-u</span> <span class="at">-b</span> 20M</span></code></pre></div>
+<p>🎉 <strong>Congratulations — you have a working end-to-end 5G
+network!</strong></p>
+<ul>
+<li>Lets close UE and gNB applications (type ctrl+c in the
+terminals)</li>
+<li>Now let’s understand what just happened under the hood…</li>
+<li>For now, lets stop the gNB and UE applications
+<ul>
+<li>Stop nrUE: Ctrl+c in the nrUE terminal</li>
+<li>Stop gNB: Ctrl+c in the gNB terminal</li>
+</ul></li>
+</ul>
 <!-- ============================================================ -->
 <!-- SECTION 3: UNDERSTANDING WHAT HAPPENED                       -->
 <!-- ============================================================ -->
 </div>
-<div id="what-just-happened" class="slide section level2 section-divider">
+<div id="what-just-happened"
+class="slide section level2 section-divider">
 <h1 class="section-divider">What Just Happened?</h1>
 </div>
 <div id="the-5g-standalone-call-flow" class="slide section level2">
 <h1>The 5G Standalone Call Flow</h1>
 <p align="center">
-<img style="display: block; margin: auto;" src="images/callflow.png" alt="5G SA Call Flow" width="800"/>
+<img style="display: block; margin: auto;" src="images/5gcall-flow.png" alt="5G SA Call Flow" width="950"/>
 </p>
-<p>When you launched the nrUE, all of this happened automatically. Let’s break it down.</p>
+<p><br> When you launched the nrUE, all these messages are exchanged,
+let’s break it down!</p>
 </div>
 <div id="key-configuration-files" class="slide section level2 action">
 <h1 class="action">Key Configuration Files</h1>
-<p>Before we look at the signaling, let’s understand what parameters you configured:</p>
-<p><strong>5G Core:</strong> <code>~/iittp-oai-hands-on/cn/conf/config.yaml</code></p>
-<p><strong>gNB:</strong> <code>~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf</code></p>
-<p><strong>nrUE:</strong> <code>~/iittp-oai-hands-on/ran/conf/ue.conf</code></p>
-<p align="center">
-<img style="display: block; margin: auto;" src="images/imsi.png" alt="IMSI/SUPI configuration" width="800"/>
-</p>
-<p>These parameters must <strong>match</strong> between UE, gNB, and Core: <strong>MCC, MNC, SST, SD, SUPI, Key, OPc, DNN</strong></p>
+<p>Before we look at the signaling, let’s understand some parameters you
+configured:</p>
+<p><strong>5G Core:</strong>
+<code>~/iittp-oai-hands-on/cn/conf/config.yaml</code></p>
+<p><strong>gNB:</strong>
+<code>~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf</code></p>
+<p><strong>nrUE:</strong>
+<code>~/iittp-oai-hands-on/ran/conf/nrue.conf</code></p>
 </div>
-<div id="ue-identifiers-who-are-you" class="slide section level2">
-<h1>UE Identifiers — Who Are You?</h1>
-<p>The 5G system uses multiple identifiers for the UE:</p>
-<table>
-<colgroup>
-<col width="39%" />
-<col width="21%" />
-<col width="39%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Identifier</th>
-<th>What</th>
-<th>When Used</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>SUPI</strong></td>
-<td>Subscription Permanent Identifier (like IMSI)</td>
-<td>Stored in SIM &amp; UDM. Never sent in clear.</td>
-</tr>
-<tr class="even">
-<td><strong>SUCI</strong></td>
-<td>Subscription Concealed Identifier</td>
-<td>Encrypted SUPI — sent during first registration</td>
-</tr>
-<tr class="odd">
-<td><strong>5G-GUTI</strong></td>
-<td>Globally Unique Temporary ID</td>
-<td>Assigned by AMF after registration — used afterwards</td>
-</tr>
-</tbody>
-</table>
-<div class="key-concept">
-<p><strong>Privacy improvement over 4G:</strong> In 5G, the permanent identity (SUPI) is <em>never</em> sent over the air in plaintext. The UE encrypts it into a SUCI using the home network’s public key.</p>
+<div id="connecting-gnb-and-core-network" class="slide section level2">
+<h1>Connecting gNB and Core Network</h1>
+<ul>
+<li>Before any UE can register, the gNB itself must first connect to the
+5G Core.</li>
+<li>Happens through the <strong>NGAP</strong> (Next Generation
+Application Protocol) over the <strong>N2 interface</strong>.</li>
+<li>🤝 <strong>NG Setup Request / Response</strong>
+<ul>
+<li>The gNB sends an <strong>NG Setup Request</strong></li>
+<li>The AMF replies with an <strong>NG Setup Response</strong></li>
+</ul></li>
+<li>✅ Now the gNB is ready to serve UEs</li>
+<li>Lets see the configuration files to see the parameters
+<ul>
+<li>Core: <code>~/iittp-oai-hands-on/cn/conf/config.yaml</code></li>
+<li>gNB:
+<code>~/iittp-oai-hands-on/ran/conf/gnb.sa.band78.106prb.rfsim.conf</code></li>
+</ul></li>
+</ul>
 </div>
-<p><strong>SUPI format:</strong> MCC (3 digits) + MNC (2–3 digits) + MSIN (up to 10 digits)</p>
-<p>Example: <code>208950000000031</code> → MCC=208, MNC=95, MSIN=0000000031</p>
-<p><strong>Look at your ue.conf</strong> — can you find the IMSI? That’s the SUPI!</p>
+<div id="steps-in-connecting-a-ue" class="slide section level2">
+<h1>Steps in Connecting a UE</h1>
+<div
+style="display: flex; align-items: start; gap: 1em; margin-top: 0;">
+<div style="flex: 1; margin: 0; padding: 0;">
+<p>When you turn on your phone or enter a new coverage area, it needs to
+<strong>register</strong> with the network before it can make calls or
+use data.</p>
+<p>This happens in a few steps:</p>
+<ul>
+<li>🙋 Registration Request
+<ul>
+<li>This is essentially the phone saying <em>“Hey, I’m here — let me
+in!”</em></li>
+<li>It includes the UE’s identity so the network knows who is trying to
+connect.</li>
+</ul></li>
+<li>🔐 Authentication
+<ul>
+<li>Verifying if its legitimate UE and network</li>
+</ul></li>
+<li>🛡️ Security Mode &amp; Registration Accept
+<ul>
+<li>Both sides trust each other</li>
+<li>The network activates <strong>encryption and integrity
+protection</strong> on all future messages</li>
+</ul></li>
+</ul>
 </div>
-<div id="registration-flow-the-big-picture" class="slide section level2">
-<h1>Registration Flow — The Big Picture</h1>
+<div
+style="display: flex; flex-direction: column; align-items: center;">
+<p><img src="images/fake-gnb.png" style="max-width: 95%; height: auto;"></p>
+</div>
+</div>
+</div>
+<div id="ue-identifiers" class="slide section level2">
+<h1>UE Identifiers</h1>
+<p>Every phone has a few key identifiers — think of them as different
+types of ID cards:</p>
+<ul>
+<li><p>🛂 <strong>IMSI</strong> — <em>International Mobile Subscriber
+Identity</em></p>
+<ul>
+<li>Tied to your <strong>SIM card</strong>. Uniquely identifies you as a
+subscriber.</li>
+</ul></li>
+<li><p>📟 <strong>IMEI</strong> — <em>International Mobile Equipment
+Identity</em></p>
+<ul>
+<li>Tied to the <strong>physical device</strong>. Identifies the
+hardware, not the person.</li>
+</ul></li>
+<li><p>📞 <strong>MSISDN</strong> — <em>Your phone number</em></p></li>
+<li><p>🏷️ <strong>GUTI / 5G-GUTI</strong> — <em>Temporary ID</em></p>
+<ul>
+<li>Assigned by the network after registration. Used instead of your
+real identity for privacy (like a visitor badge)</li>
+</ul></li>
+<li><p>An IMSI is a 15-digit number with three parts:</p></li>
+</ul>
+<pre><code>IMSI: 404 49 1234567890
+       │   │  │
+       │   │  └── MSIN: Mobile Subscriber Identification Number (9-10digits. your unique ID within the network)
+       │   └───── MNC:  Mobile Network Code (49 = Airtel), 2-3 digits.
+       └───────── MCC:  Mobile Country Code (404 = India) </code></pre>
+</div>
+<div id="g-vs-5g-privacy-improvement" class="slide section level2">
+<h1>🔒 4G vs 5G: Privacy Improvement</h1>
+<ul>
+<li>In <strong>4G (LTE)</strong>, the IMSI is sent <strong>in plain
+text</strong> over the air during the initial attach.</li>
+<li>This is a known privacy risk — anyone with a radio receiver (like an
+IMSI catcher) can grab your identity.</li>
+<li>In 5G, iInstead of sending the raw IMSI, the UE
+<strong>encrypts</strong> it into a value called <strong>SUCI</strong>
+(Subscription Concealed Identifier) before transmitting.</li>
+<li>The network decrypts it on its side.</li>
+<li>This means even if someone intercepts the message, they only see a
+scrambled value — not your real identity.</li>
+<li>Lets see the configuration files to see the parameters
+<ul>
+<li>Core: <code>~/iittp-oai-hands-on/cn/conf/config.yaml</code></li>
+<li>nrUE: <code>~/iittp-oai-hands-on/ran/conf/nrue.conf</code></li>
+</ul></li>
+</ul>
+</div>
+<div id="registration-flow" class="slide section level2">
+<h1>Registration Flow</h1>
 <pre class="mermaid"><code>sequenceDiagram
     participant UE
     participant gNB
@@ -631,21 +759,111 @@ sudo apt install -y docker docker-ce</code></pre>
 
     AMF-&gt;&gt;UE: Registration Accept (5G-GUTI)
     UE--&gt;&gt;AMF: Registration Complete</code></pre>
-<p>This is what happened when you launched the nrUE. Let’s break it down step by step.</p>
 </div>
-<div id="step-1-registration-request" class="slide section level2">
-<h1>Step 1: Registration Request</h1>
-<pre><code>UE → gNB → AMF</code></pre>
+<div id="procedures-step-by-step" class="slide section level2">
+<h1>Procedures — Step by Step</h1>
+<h3 id="phase-1-ng-setup-gnb-connects-to-core">Phase 1: NG Setup (gNB
+Connects to Core)</h3>
 <ul>
-<li>UE creates a <strong>NAS Registration Request</strong> containing its <strong>SUCI</strong></li>
-<li>This NAS message is wrapped inside <strong>RRC</strong> (radio) and delivered to gNB</li>
-<li>gNB wraps it in <strong>NGAP</strong> (N2) and forwards to AMF</li>
-<li>AMF receives the SUCI and now needs to authenticate the UE</li>
+<li>This is the very first exchange when a gNB starts up.</li>
+<li>It is <strong>non-UE-associated</strong> — no users are involved
+yet.</li>
 </ul>
-<p><strong>Remember:</strong> In RFsim mode, the radio part is simulated, but the NAS and NGAP messages are <strong>real</strong> — exactly what you’d see on a live network.</p>
+<pre><code>gNB                                  AMF
+ │                                    │
+ │──── NGSetupRequest ───────────────►│
+ │     • GlobalRANNodeID              │
+ │     • Supported Tracking Areas     │
+ │     • Paging DRX                   │
+ │                                    │
+ │◄─── NGSetupResponse ──────────────│
+ │     • AMF Name                     │
+ │     • Served GUAMI List            │
+ │     • PLMN Support List            │
+ │     • Relative AMF Capacity        │
+ │                                    │</code></pre>
+<ul>
+<li>The gNB introduces itself and AMF responds</li>
+<li>After this, the gNB is ready to accept UE connections</li>
+</ul>
+<h3 id="phase-2-ue-registration">Phase 2: UE Registration</h3>
+<p>When a UE (phone) turns on and wants to connect to the network.</p>
+<h4 id="step-1-initial-ue-message">Step 1: Initial UE Message</h4>
+<pre><code>UE            gNB                                  AMF
+ │              │                                    │
+ │──NAS Reg───►│                                    │
+ │  Request     │──── InitialUEMessage ─────────────►│
+ │              │     • RAN-UE-NGAP-ID              │
+ │              │     • NAS-PDU: Registration Request │
+ │              │                                    │</code></pre>
+<ul>
+<li>This is the first UE-associated NGAP message</li>
+<li>The gNB assigns a RAN-UE-NGAP-ID to track this UE</li>
+<li>The NAS Registration Request is carried as a payload — the gNB
+doesn’t read it</li>
+</ul>
+<h4 id="step-2-authentication-nas-transport">Step 2: Authentication (NAS
+Transport)</h4>
+<pre><code>UE            gNB                                  AMF
+ │              │                                    │
+ │              │◄── DownlinkNASTransport ───────────│
+ │◄──NAS──────│     • AMF-UE-NGAP-ID                │
+ │  Auth Req    │     • RAN-UE-NGAP-ID              │
+ │              │     • NAS-PDU: Auth Request       │
+ │              │                                    │
+ │──NAS──────►│                                    │
+ │  Auth Resp   │──── UplinkNASTransport ───────────►│
+ │              │     • NAS-PDU: Auth Response        │
+ │              │                                    │</code></pre>
+<ul>
+<li>AMF assigns its own AMF-UE-NGAP-ID</li>
+<li>AMF sends Authentication Request via DownlinkNASTransport</li>
+<li>UE responds with Auth Response via UplinkNASTransport</li>
+<li>Behind the scenes: AMF talks to AUSF → UDM → UDR to verify
+credentials</li>
+</ul>
+<h4 id="step-3-security-mode-nas-transport">Step 3: Security Mode (NAS
+Transport)</h4>
+<pre><code>UE            gNB                                  AMF
+ │              │                                    │
+ │              │◄── DownlinkNASTransport ───────────│
+ │◄──NAS──────│     • NAS-PDU: Security Mode Command │
+ │  SMC         │                                    │
+ │              │                                    │
+ │──NAS──────►│                                    │
+ │  SM Complete │──── UplinkNASTransport ───────────►│
+ │              │     • NAS-PDU: Security Mode Complete│
+ │              │                                    │</code></pre>
+<ul>
+<li>AMF sends Security Mode Command to activate encryption and integrity
+protection</li>
+<li>From this point onwards, NAS messages are encrypted</li>
+</ul>
+<h4 id="step-4-initial-context-setup">Step 4: Initial Context Setup</h4>
+<pre><code>gNB                                  AMF
+ │                                    │
+ │◄── InitialContextSetupRequest ────│
+ │    • AMF-UE-NGAP-ID               │
+ │    • RAN-UE-NGAP-ID               │
+ │    • Security Key                  │
+ │    • UE Security Capabilities      │
+ │    • Allowed NSSAI (slices)        │
+ │    • NAS-PDU: Registration Accept  │
+ │    • (Optional: PDU Session        │
+ │       Resource Setup List)         │
+ │                                    │
+ │── InitialContextSetupResponse ───►│
+ │    • PDU Session Resource          │
+ │      Setup Response List           │
+ │                                    │</code></pre>
+<ul>
+<li>AMF sends security keys and UE capabilities to the gNB</li>
+<li>The NAS Registration Accept is included — tells the UE “you’re
+in”</li>
+</ul>
 </div>
-<div id="step-2-5g-aka-authentication" class="slide section level2">
-<h1>Step 2: 5G-AKA Authentication</h1>
+<div id="g-aka-authentication" class="slide section level2">
+<h1>5G-AKA Authentication</h1>
 <pre class="mermaid"><code>sequenceDiagram
     participant UE
     participant AMF
@@ -666,53 +884,43 @@ sudo apt install -y docker docker-ce</code></pre>
     AMF-&gt;&gt;AUSF: Verify (RES*)
     AUSF-&gt;&gt;AUSF: Compare RES* with XRES*
     AUSF--&gt;&gt;AMF: Success + Kseaf</code></pre>
-<div class="key-concept">
-<p><strong>Mutual authentication:</strong> The UE verifies the network (via AUTN) AND the network verifies the UE (via RES*). Neither side trusts the other blindly.</p>
-</div>
-<p><strong>Pre-shared secrets:</strong> Both UE (SIM) and UDM know <strong>K</strong> (secret key) and <strong>OP/OPc</strong>. These are the <code>key</code> and <code>opc</code> fields in your <code>ue.conf</code> and the CN database!</p>
-</div>
-<div id="step-3-security-mode-registration-accept" class="slide section level2">
-<h1>Step 3: Security Mode &amp; Registration Accept</h1>
-<p>After successful authentication:</p>
-<ol style="list-style-type: decimal">
-<li><strong>AMF → UE: Security Mode Command</strong>
 <ul>
-<li>Tells UE which encryption and integrity algorithms to use</li>
-<li>From this point, all NAS messages are encrypted</li>
-</ul></li>
-<li><strong>UE → AMF: Security Mode Complete</strong>
-<ul>
-<li>UE confirms it can encrypt/decrypt</li>
-</ul></li>
-<li><strong>AMF → UE: Registration Accept</strong>
-<ul>
-<li>AMF assigns a <strong>5G-GUTI</strong> (temporary ID)</li>
-<li>UE is now registered on the network</li>
-</ul></li>
-<li><strong>UE → AMF: Registration Complete</strong></li>
-</ol>
-<p>After this, the UE has a signaling connection. The network then sets up a <strong>PDU Session</strong> to create the data path — that’s how your UE got the IP address and could ping. We’ll cover PDU sessions in detail tomorrow.</p>
+<li><strong>Mutual authentication:</strong> The UE verifies the network
+(via AUTN) AND the network verifies the UE (via RES*)</li>
+<li><strong>Pre-shared secrets:</strong> Both UE (SIM) and UDM know
+<strong>K</strong> (secret key) and <strong>OP/OPc</strong></li>
+<li>These are the <code>key</code> and <code>opc</code> fields in your
+<code>nrue.conf</code> and the CN database!</li>
+</ul>
 <!-- ============================================================ -->
 <!-- SECTION 4: WIRESHARK ANALYSIS                                -->
 <!-- ============================================================ -->
 </div>
-<div id="wireshark-analysis" class="slide section level2 section-divider">
+<div id="wireshark-analysis"
+class="slide section level2 section-divider">
 <h1 class="section-divider">Wireshark Analysis</h1>
 </div>
 <div id="capture-traces" class="slide section level2 action">
 <h1 class="action">Capture Traces</h1>
-<p>Let’s capture the signaling. Stop your gNB and UE if running, then:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true"></a><span class="co"># Start tcpdump to capture on the CN bridge interface</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true"></a><span class="fu">sudo</span> tcpdump -i oai-cn5g -w monolithic.pcap</span></code></pre></div>
-<p>Now restart the gNB and UE (same commands as before). Let the UE connect fully, do a ping, then stop tcpdump with <code>Ctrl+C</code>.</p>
-<p>Open the capture:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true"></a><span class="ex">wireshark</span> monolithic.pcap <span class="kw">&amp;</span></span></code></pre></div>
-<p><strong>Display filter:</strong></p>
-<pre><code>ngap || nas-5gs || pfcp || gtp</code></pre>
+<ul>
+<li><p>Let’s capture the signaling</p></li>
+<li><p>Stop your gNB and UE if running</p></li>
+<li><p>Open a capture using Wireshark in a new terminal window</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a> <span class="ex">wireshark</span> <span class="kw">&amp;</span></span></code></pre></div></li>
+<li><p>Select “oai-cn5g” in the <strong>Capture filter</strong></p></li>
+<li><p>Select <strong>Display filter:</strong></p>
+<p>ngap || nas-5gs</p></li>
+<li><p>Now restart the gNB and UE (same commands as before).</p></li>
+<li><p>Let the UE connect fully, do a ping.</p></li>
+<li><p>Lets analyze the capture in wireshark</p></li>
+</ul>
 </div>
-<div id="find-the-registration-messages" class="slide section level2 observe">
+<div id="find-the-registration-messages"
+class="slide section level2 observe">
 <h1 class="observe">Find the Registration Messages</h1>
-<p>In Wireshark, you should see these messages. Find each one:</p>
+<p>In Wireshark, you should see these messages. Find and analyze each
+one.</p>
 <table>
 <colgroup>
 <col width="7%" />
@@ -720,77 +928,114 @@ sudo apt install -y docker docker-ce</code></pre>
 <col width="22%" />
 <col width="42%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th>#</th>
-<th>Direction</th>
-<th>Message</th>
-<th>What to Look For</th>
-</tr>
-</thead>
 <tbody>
 <tr class="odd">
 <td>1</td>
 <td>gNB → AMF</td>
-<td><strong>NGAP: InitialUEMessage</strong></td>
-<td>Contains NAS Registration Request with SUCI</td>
+<td><strong>NGAP Setup Request</strong></td>
+<td>Contains gNB Id, Supported PLMN, etc.</td>
 </tr>
 <tr class="even">
 <td>2</td>
+<td>AMF → gNB</td>
+<td><strong>NGAP Setup Response</strong></td>
+<td>Failure cause (or) AMF Id and PLMN list in case of success</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>gNB → AMF</td>
+<td><strong>NGAP: InitialUEMessage</strong></td>
+<td>Contains UE NAS PDU with SUCI for registration</td>
+</tr>
+<tr class="even">
+<td>4</td>
 <td>AMF → gNB → UE</td>
 <td><strong>NAS: Authentication Request</strong></td>
 <td>Contains RAND and AUTN</td>
 </tr>
 <tr class="odd">
-<td>3</td>
+<td>5</td>
 <td>UE → gNB → AMF</td>
 <td><strong>NAS: Authentication Response</strong></td>
 <td>Contains RES*</td>
 </tr>
 <tr class="even">
-<td>4</td>
+<td>6</td>
 <td>AMF → UE</td>
 <td><strong>NAS: Security Mode Command</strong></td>
 <td>Encryption algorithm selected</td>
 </tr>
 <tr class="odd">
-<td>5</td>
+<td>7</td>
 <td>UE → AMF</td>
 <td><strong>NAS: Security Mode Complete</strong></td>
 <td></td>
 </tr>
 <tr class="even">
-<td>6</td>
+<td>8</td>
 <td>AMF → UE</td>
 <td><strong>NAS: Registration Accept</strong></td>
 <td>Contains the assigned 5G-GUTI</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Click on each message</strong> and expand the NAS layer to see the actual field values.</p>
+<p><strong>Click on each message</strong> and expand the NAS layer to
+see the actual field values.</p>
 </div>
 <div id="discuss-what-did-you-see" class="slide section level2 discuss">
 <h1 class="discuss">Discuss: What Did You See?</h1>
 <p>Let’s compare what Wireshark shows with the theory:</p>
 <ol style="list-style-type: decimal">
-<li><p><strong>Find the SUCI</strong> in the Registration Request — can you see the MCC/MNC? Is the MSIN in clear text or concealed? Compare with your <code>ue.conf</code></p></li>
-<li><p><strong>Find RAND and AUTN</strong> in the Authentication Request — these are the challenge from the network</p></li>
-<li><p><strong>Find RES</strong>* in the Authentication Response — this is the UE’s proof of identity</p></li>
-<li><p><strong>After Security Mode Command</strong> — are subsequent NAS messages encrypted? How can you tell?</p></li>
-<li><p><strong>Find the 5G-GUTI</strong> in the Registration Accept — this is the temporary ID the UE will use from now on</p></li>
+<li><p><strong>Find the SUCI</strong> in the Registration Request — can
+you see the MCC/MNC? Is the MSIN in clear text or concealed? Compare
+with your <code>nrue.conf</code></p></li>
+<li><p><strong>Find RAND and AUTN</strong> in the Authentication Request
+— these are the challenge from the network</p></li>
+<li><p><strong>Find RES</strong>* in the Authentication Response — this
+is the UE’s proof of identity</p></li>
+<li><p><strong>After Security Mode Command</strong> — are subsequent NAS
+messages encrypted? How can you tell?</p></li>
 </ol>
 </div>
-<div id="experiment-what-if-the-ue-is-unknown" class="slide section level2 action">
-<h1 class="action">Experiment: What if the UE is Unknown?</h1>
-<p>Let’s see what happens when authentication fails:</p>
-<ol style="list-style-type: decimal">
-<li><p><strong>Change the SUPI</strong> in <code>ue.conf</code> to a value not in the CN database</p></li>
-<li><p>Restart the nrUE</p></li>
-<li><p>Watch the AMF logs:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true"></a><span class="ex">docker</span> logs oai-amf -f</span></code></pre></div></li>
+<div id="connecting-to-a-wrong-network"
+class="slide section level2 action">
+<h1 class="action">Connecting to a wrong network</h1>
+<ul>
+<li><p>Close the nrUE &amp; gNB applications if thay are
+running</p></li>
+<li><p>In seperate terminals run gNB and UE. But we will use different
+config file for UE!</p></li>
+<li><p>Run the gNB same as before</p></li>
+<li><p>For UE</p>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>  <span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>  <span class="fu">sudo</span> ./nr-uesoftmodem <span class="at">-r</span> 106 <span class="at">--numerology</span> 1 <span class="at">--band</span> 78 <span class="at">-C</span> 3619200000 <span class="at">--ssb</span> 516 <span class="at">--rfsim</span> <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/nrue-imsi.conf</span></code></pre></div></li>
+<li><p>Watch the AMF logs</p>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="ex">docker</span> logs oai-amf <span class="at">-f</span></span></code></pre></div></li>
 <li><p>Check Wireshark — do you see a Registration Reject?</p></li>
-</ol>
-<p><strong>Try also:</strong> Change the <code>key</code> or <code>opc</code> in <code>ue.conf</code> (keep SUPI correct). What happens now? The UE is known but authentication fails — different error!</p>
+</ul>
+</div>
+<div id="sim-has-compromised-or-a-fake-sim"
+class="slide section level2 action">
+<h1 class="action">SIM has compromised or a fake SIM</h1>
+<ul>
+<li><p>Close the nrUE &amp; gNB applications if thay are
+running</p></li>
+<li><p>In seperate terminals run gNB and UE. But we will use different
+config file for UE!</p></li>
+<li><p>Run the gNB same as before</p></li>
+<li><p>For UE</p>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>  <span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/cmake_targets/ran_build/build</span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>  <span class="fu">sudo</span> ./nr-uesoftmodem <span class="at">-r</span> 106 <span class="at">--numerology</span> 1 <span class="at">--band</span> 78 <span class="at">-C</span> 3619200000 <span class="at">--ssb</span> 516 <span class="at">--rfsim</span> <span class="at">-O</span> ~/iittp-oai-hands-on/ran/conf/nrue-key.conf</span></code></pre></div></li>
+<li><p>Watch the AMF logs</p>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="ex">docker</span> logs oai-amf <span class="at">-f</span></span></code></pre></div></li>
+<li><p>Check Wireshark — do you see a Registration Reject? What happens
+to the authentication process?</p></li>
+<li><p>Check UE logs</p></li>
+</ul>
 </div>
 <div id="most-common-errors" class="slide section level2">
 <h1>Most Common Errors</h1>
@@ -804,7 +1049,7 @@ sudo apt install -y docker docker-ce</code></pre>
 <tr class="header">
 <th>Error</th>
 <th>Cause</th>
-<th>Where to Check</th>
+<th>Check</th>
 </tr>
 </thead>
 <tbody>
@@ -821,16 +1066,38 @@ sudo apt install -y docker docker-ce</code></pre>
 <tr class="odd">
 <td>Authentication Failure</td>
 <td>Key or OPc mismatch</td>
-<td>ue.conf vs CN database</td>
-</tr>
-<tr class="even">
-<td>PDU Session Reject</td>
-<td>DNN or SST mismatch</td>
-<td>ue.conf vs CN config</td>
+<td>nrue.conf vs CN database</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Debug tools:</strong> Wireshark traces + <code>docker logs oai-amf -f</code> + <code>docker logs oai-smf -f</code> <!-- ============================================================ --> <!-- SECTION 5: WRAP-UP                                           --> <!-- ============================================================ --></p>
+<ul>
+<li><strong>Debug tools:</strong>
+<ul>
+<li>Wireshark traces</li>
+<li><code>docker logs oai-amf -f</code></li>
+<li>UE and gNB logs</li>
+</ul></li>
+</ul>
+</div>
+<div id="using-a-commercial-ue-with-oai" class="slide section level2">
+<h1>Using a Commercial UE with OAI</h1>
+<p>To use a <strong>COTS phone/module</strong> instead of the OAI
+softmodem UE, you need a <strong>programmable SIM card</strong>.</p>
+<ul>
+<li><strong>Get a programmable USIM</strong> — <a
+href="https://open-cells.com/index.php/sim-cards/">Open-Cells</a></li>
+<li><strong>Program it</strong> with IMSI, Ki, OPc matching your CN
+database (<code>oai_db.sql</code>)
+<ul>
+<li>Open-Cells tool: <code>program_uicc</code></li>
+</ul></li>
+</ul>
+<p>📖 Full guide: <a
+href="https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/NR_SA_Tutorial_COTS_UE.md">OAI
+COTS UE Tutorial</a></p>
+<!-- ============================================================ -->
+<!-- SECTION 5: WRAP-UP                                           -->
+<!-- ============================================================ -->
 </div>
 <div id="summary" class="slide section level2 section-divider">
 <h1 class="section-divider">Summary</h1>
@@ -845,7 +1112,7 @@ sudo apt install -y docker docker-ce</code></pre>
 <p><strong>Understood What Happened</strong></p>
 <ul>
 <li>5G Core architecture: SBA, NFs, what each does</li>
-<li>UE identifiers: SUPI, SUCI, 5G-GUTI</li>
+<li>UE identifiers</li>
 <li>Registration and 5G-AKA authentication flow</li>
 <li>Analyzed real signaling messages in Wireshark</li>
 <li>Mapped config file parameters to protocol messages</li>
@@ -853,10 +1120,10 @@ sudo apt install -y docker docker-ce</code></pre>
 </div>
 <div id="whats-coming-tomorrow-day-2" class="slide section level2">
 <h1>What’s Coming Tomorrow — Day 2</h1>
-<p><strong>PDU Session &amp; Data Plane (picking up where we left)</strong></p>
+<p><strong>PDU Session &amp; Data Plane (picking up where we
+left)</strong></p>
 <ul>
 <li>How the UE gets its IP address (PDU session establishment)</li>
-<li>PFCP: how SMF programs the UPF</li>
 <li>GTP-U tunneling: how your data actually flows</li>
 <li>QoS flows, 5QI, DRB mapping</li>
 </ul>
@@ -871,25 +1138,17 @@ sudo apt install -y docker docker-ce</code></pre>
 <div id="keep-your-setup-running" class="slide section level2 action">
 <h1 class="action">Keep Your Setup Running!</h1>
 <p>For tomorrow, you’ll need the same environment.</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true"></a><span class="co"># To gracefully stop today&#39;s session:</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true"></a></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true"></a> <span class="ex">1.</span> Stop nrUE: Ctrl+C in the nrUE terminal</span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true"></a> <span class="ex">2.</span> Stop gNB: Ctrl+C in the gNB terminal</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true"></a> <span class="ex">3.</span> Stop CN: </span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true"></a>     <span class="bu">cd</span> ~/iittp-oai-hands-on/cn</span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true"></a>     <span class="ex">idocker</span> compose down    # stop</span></code></pre></div>
-<p><strong>Don’t delete</strong> the OAI build — we’ll use the same binaries tomorrow!</p>
-</div>
-<div id="thank-you" class="slide section level2">
-<h1>Thank You!</h1>
-<p><strong>OAI Resources:</strong></p>
-<ul>
-<li>OAI RAN: <code>https://gitlab.eurecom.fr/oai/openairinterface5g</code></li>
-<li>OAI CN5G: <code>https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g</code></li>
-<li>OAI Documentation: <code>https://openairinterface.org/</code></li>
-</ul>
-<p><strong>Questions?</strong></p>
-<p>See you tomorrow for the data plane &amp; RAN deep dive!</p>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="co"># To gracefully stop today&#39;s session:</span></span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a> <span class="ex">1.</span> Stop nrUE: Ctrl+C in the nrUE terminal</span>
+<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a> <span class="ex">2.</span> Stop gNB: Ctrl+C in the gNB terminal</span>
+<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a> <span class="ex">3.</span> Stop CN: </span>
+<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a>     <span class="bu">cd</span> ~/iittp-oai-hands-on/openairinterface5g/doc/tutorial_resources/oai-cn5g</span>
+<span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a>     <span class="ex">docker</span> compose down    <span class="co"># stop and remove containers</span></span></code></pre></div>
+<p><strong>Don’t delete</strong> the OAI build &amp; core network
+images— we’ll use the same binaries tomorrow!</p>
+<p><strong>See you tomorrow!</strong></p>
 </div>
 </body>
 </html>
